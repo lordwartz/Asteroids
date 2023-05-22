@@ -29,7 +29,7 @@ def get_random_position(surface):
 
 
 def get_random_velocity(min_speed, max_speed):
-    speed = random.randint(min_speed, max_speed)
+    speed = random.uniform(min_speed, max_speed)
     angle = random.randrange(0, 360)
     return Vector2(speed, 0).rotate(angle)
 
@@ -39,5 +39,14 @@ def print_text(surface, text, font, color=Color("red")):
 
     rect = text_surface.get_rect()
     rect.center = Vector2(surface.get_size()) / 2
+
+    surface.blit(text_surface, rect)
+
+
+def print_text_top(surface, text, font, color=Color("red")):
+    text_surface = font.render(text, True, color)
+
+    rect = text_surface.get_rect()
+    rect.center = (surface.get_size()[0] // 2, 20)
 
     surface.blit(text_surface, rect)

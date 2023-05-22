@@ -28,10 +28,15 @@ class Spaceship(GameObject):
     BULLET_SPEED = 3
 
     def __init__(self, position, create_bullet_callback):
+        self.score = 0
+        self.lives = 3
         self.create_bullet_callback = create_bullet_callback
 
         self.direction = Vector2(0, -1)
         super().__init__(position, load_sprite("spaceship"), Vector2(0))
+
+    def add_score(self, score_value):
+        self.score += score_value
 
     def rotate(self, clockwise=True):
         sign = 1 if clockwise else -1
@@ -47,6 +52,13 @@ class Spaceship(GameObject):
 
     def accelerate(self):
         self.velocity += self.direction * self.ACCELERATION
+
+    def not_accelerate(self):
+        if self.velocity != Vector2(0, 0) or self.velocity[0] < 0 or \
+                self.velocity[1] < 0:
+            self.velocity -= self.direction * self.ACCELERATION
+            if self.velocity[0] < 0 or self.velocity[1] < 0:
+                self.velocity = Vector2(0, 0)
 
     def shoot(self):
         bullet_velocity = self.direction * self.BULLET_SPEED + self.velocity
@@ -68,10 +80,16 @@ class Asteroid(GameObject):
         sprite = rotozoom(load_sprite("asteroid"), 0, scale)
 
         super().__init__(
-            position, sprite, get_random_velocity(1, 3)
+            position, sprite, get_random_velocity(0.25, 1)
         )
 
-    def split(self):
+    def split(self, spaceship, ):
+        if self.size == 3:
+            spaceship.score += 300
+        elif self.size == 2:
+            spaceship.score += 200
+        elif self.size == 1:
+            spaceship.score += 100
         if self.size > 1:
             for _ in range(2):
                 asteroid = Asteroid(

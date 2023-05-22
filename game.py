@@ -1,6 +1,6 @@
 import pygame
 
-from utils import get_random_position, print_text
+from utils import get_random_position, print_text_top, print_text, load_sprite
 from models import Asteroid, Spaceship
 
 
@@ -67,6 +67,8 @@ class Asteroids:
                 self.spaceship.rotate(clockwise=False)
             if is_key_pressed[pygame.K_UP]:
                 self.spaceship.accelerate()
+            if not is_key_pressed[pygame.K_UP]:
+                self.spaceship.not_accelerate()
 
     def process_game_logic(self):
         for game_object in self.get_game_objects():
@@ -75,17 +77,21 @@ class Asteroids:
         if self.spaceship:
             for asteroid in self.asteroids:
                 if asteroid.collides_with(self.spaceship):
-                    self.spaceship = None
-                    self.message = "You lost!"
-                    break
+                    self.spaceship.position = (400, 300)
+                    self.spaceship.lives -= 1
+                    if self.spaceship.lives == 0:
+                        self.spaceship = None
+                        self.message = "You lost!"
+                        break
 
-        for bullet in self.bullets[:]:
-            for asteroid in self.asteroids[:]:
-                if asteroid.collides_with(bullet):
-                    self.asteroids.remove(asteroid)
-                    self.bullets.remove(bullet)
-                    asteroid.split()
-                    break
+        if self.spaceship:
+            for bullet in self.bullets[:]:
+                for asteroid in self.asteroids[:]:
+                    if asteroid.collides_with(bullet):
+                        self.asteroids.remove(asteroid)
+                        self.bullets.remove(bullet)
+                        asteroid.split(self.spaceship)
+                        break
 
         for bullet in self.bullets[:]:
             if not self.screen.get_rect().collidepoint(bullet.position):
@@ -96,6 +102,15 @@ class Asteroids:
 
     def draw(self):
         self.screen.fill((0, 0, 0))
+
+        if self.spaceship:
+            heart_image = load_sprite("heart")
+            heart_rect = heart_image.get_rect()
+            for i in range(self.spaceship.lives):
+                self.screen.blit(heart_image, (10 + i * heart_rect.width, 10))
+
+            print_text_top(self.screen, f'Score: {self.spaceship.score}',
+                           pygame.font.Font(None, 32))
 
         for game_object in self.get_game_objects():
             game_object.draw(self.screen)
