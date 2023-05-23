@@ -47,6 +47,6 @@ def print_text_top(surface, text, font, color=Color("red")):
     text_surface = font.render(text, True, color)
 
     rect = text_surface.get_rect()
-    rect.center = (surface.get_size()[0] // 2, 20)
+    rect.center = Vector2(surface.get_size()[0] // 2, 20)
 
     surface.blit(text_surface, rect)
