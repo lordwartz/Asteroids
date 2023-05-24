@@ -1,13 +1,18 @@
-import pygame_gui
+#import pygame_gui
+from turtledemo.paint import switchupdown
+
 import pygame
 
 from pygame import Color, Vector2
 from utils import get_random_position, print_text_top, print_text, load_sprite
-from models import Asteroid, Spaceship
+from models import Asteroid, Spaceship, Ufo
 
+FRAMERATE = 60
+A = 100
 
 class Asteroids:
     MIN_ASTEROID_DISTANCE = 250
+    MIN_UFO_DISTANCE = 300
 
     def __init__(self):
         self.init_pygame()
@@ -18,7 +23,9 @@ class Asteroids:
 
         self.asteroids = []
         self.bullets = []
+        self.bullets_ufo = []
         self.spaceship = Spaceship((400, 300), self.bullets.append)
+        self.ufo = []
 
         for _ in range(6):
             while True:
@@ -32,7 +39,7 @@ class Asteroids:
             self.asteroids.append(Asteroid(position, self.asteroids.append))
 
     def get_game_objects(self):
-        game_objects = [*self.asteroids, *self.bullets]
+        game_objects = [*self.asteroids, *self.bullets, *self.ufo, *self.bullets_ufo]
 
         if self.spaceship:
             game_objects.append(self.spaceship)
@@ -72,17 +79,21 @@ class Asteroids:
                 self.spaceship.not_accelerate()
 
     def process_game_logic(self):
+        global A
         for game_object in self.get_game_objects():
             game_object.move(self.screen)
+
+        if self.ufo:
+            for ufo in self.ufo[:]:
+                if ufo.current_frame % ufo.BULLET_FREQUENCY < 1:
+                    ufo.shoot()
 
         if self.spaceship:
             for asteroid in self.asteroids:
                 if asteroid.collides_with(self.spaceship):
                     self.spaceship.position = (400, 300)
                     self.spaceship.lives -= 1
-                    if self.spaceship.lives == 0:
-                        self.spaceship = None
-                        open_restart(self.screen)
+                    self.check_death()
 
         if self.spaceship:
             for bullet in self.bullets[:]:
@@ -93,15 +104,46 @@ class Asteroids:
                         asteroid.split(self.spaceship)
                         break
 
+            for bullet in self.bullets_ufo[:]:
+                if bullet.collides_with(self.spaceship):
+                    self.spaceship.lives -= 1
+                    self.check_death()
+                    self.bullets_ufo.remove(bullet)
+                    break
+
+            for bullet in self.bullets[:]:
+                for ufo in self.ufo[:]:
+                    if bullet.collides_with(ufo):
+                        self.ufo.remove(ufo)
+                        self.bullets.remove(bullet)
+
         for bullet in self.bullets[:]:
             if not self.screen.get_rect().collidepoint(bullet.position):
                 self.bullets.remove(bullet)
 
+        for ufo in self.ufo[:]:
+            if not self.screen.get_rect().collidepoint(ufo.position):
+                self.ufo.remove(ufo)
+
         if not self.asteroids and self.spaceship:
             self.message = "You won!"
 
+    def check_death(self):
+        if self.spaceship.lives < 0:
+            self.spaceship = None
+            open_restart(self.screen)
+
     def draw(self):
         self.screen.fill((0, 0, 0))
+        if self.spaceship and len(self.ufo) < 1:
+            while True:
+                position = get_random_position(self.screen)
+                if (
+                        position.distance_to(self.spaceship.position)
+                        > self.MIN_UFO_DISTANCE
+                ):
+                    break
+            self.ufo.append(Ufo(position, self.bullets_ufo.append))
 
         if self.spaceship:
             heart_image = load_sprite("heart")
@@ -119,7 +161,7 @@ class Asteroids:
             print_text(self.screen, self.message, self.font)
 
         pygame.display.flip()
-        self.clock.tick(60)
+        self.clock.tick(FRAMERATE)
 
     def pause_game(self):
         pygame.display.set_caption("Paused")

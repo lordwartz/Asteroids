@@ -1,5 +1,6 @@
 from pygame.math import Vector2
 from pygame.transform import rotozoom
+
 from utils import get_random_velocity, load_sprite, wrap_position
 
 
@@ -62,7 +63,7 @@ class Spaceship(GameObject):
 
     def shoot(self):
         bullet_velocity = self.direction * self.BULLET_SPEED + self.velocity
-        bullet = Bullet(self.position, bullet_velocity)
+        bullet = Bullet(self.position, bullet_velocity, True)
         self.create_bullet_callback(bullet)
 
 
@@ -99,8 +100,33 @@ class Asteroid(GameObject):
 
 
 class Bullet(GameObject):
-    def __init__(self, position, velocity):
-        super().__init__(position, load_sprite("bullet"), velocity)
+    def __init__(self, position, velocity, is_spaceship_bullet):
+        if is_spaceship_bullet:
+            super().__init__(position, load_sprite("bullet"), velocity)
+        else:
+            super().__init__(position, load_sprite("enemy_bullet"), velocity)
 
     def move(self, surface):
         self.position = self.position + self.velocity
+
+
+class Ufo(GameObject):
+    BULLET_SPEED = 1
+    BULLET_FREQUENCY = 25
+
+    def __init__(self, position, create_bullet_callback):
+        self.create_bullet_callback = create_bullet_callback
+        self.current_frame = 0
+        self.direction = Vector2(0, -1)
+
+        sprite = rotozoom(load_sprite("ufo"), 0, 1)
+        super().__init__(position, sprite, get_random_velocity(1, 2))
+
+    def move(self, surface):
+        self.position = self.position + self.velocity
+        self.current_frame += 1
+
+    def shoot(self):
+        bullet_velocity = get_random_velocity(1, 2) * self.BULLET_SPEED + self.velocity
+        bullet = Bullet(self.position, bullet_velocity, False)
+        self.create_bullet_callback(bullet)
