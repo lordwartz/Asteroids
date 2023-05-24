@@ -50,7 +50,7 @@ class Asteroids:
                 self.spaceship.rotate(clockwise=False)
             if is_key_pressed[pygame.K_UP]:
                 self.spaceship.accelerate()
-            if not is_key_pressed[pygame.K_UP]:
+            else:
                 self.spaceship.not_accelerate()
 
     def process_game_logic(self):

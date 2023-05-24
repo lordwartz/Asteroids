@@ -27,6 +27,7 @@ class Spaceship(GameObject):
     MANEUVERABILITY = 3
     ACCELERATION = 0.25
     BULLET_SPEED = 3
+    SPACESHIP_ANTIGRAVITY = 0.05
 
     def __init__(self, position, create_bullet_callback):
         self.score = 0
@@ -55,11 +56,8 @@ class Spaceship(GameObject):
         self.velocity += self.direction * self.ACCELERATION
 
     def not_accelerate(self):
-        if self.velocity != Vector2(0, 0) or self.velocity[0] < 0 or \
-                self.velocity[1] < 0:
-            self.velocity -= self.direction * self.ACCELERATION
-            if self.velocity[0] < 0 or self.velocity[1] < 0:
-                self.velocity = Vector2(0, 0)
+        if self.velocity != Vector2(0, 0):
+            self.velocity -= self.velocity * self.SPACESHIP_ANTIGRAVITY
 
     def shoot(self):
         bullet_velocity = self.direction * self.BULLET_SPEED + self.velocity
