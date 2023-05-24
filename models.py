@@ -1,5 +1,8 @@
+import pygame.time
+import time
 from pygame.math import Vector2
 from pygame.transform import rotozoom
+
 from utils import get_random_velocity, load_sprite, wrap_position
 
 
@@ -104,3 +107,26 @@ class Bullet(GameObject):
 
     def move(self, surface):
         self.position = self.position + self.velocity
+
+
+class Ufo(GameObject):
+    BULLET_SPEED = 1
+    BULLET_FREQUENCY = 25
+
+    def __init__(self, position, create_bullet_callback):
+        self.create_bullet_callback = create_bullet_callback
+        self.current_frame = 0
+        self.direction = Vector2(0, -1)
+
+        sprite = rotozoom(load_sprite("ufo"), 0, 1)
+        super().__init__(position, sprite, get_random_velocity(1, 2))
+
+    def move(self, surface):
+        self.position = self.position + self.velocity
+        self.current_frame += 1
+
+
+    def shoot(self):
+        bullet_velocity = get_random_velocity(1, 2) * self.BULLET_SPEED + self.velocity
+        bullet = Bullet(self.position, bullet_velocity)
+        self.create_bullet_callback(bullet)
