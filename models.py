@@ -68,33 +68,39 @@ class Spaceship(GameObject):
 
 
 class Asteroid(GameObject):
-    def __init__(self, position, create_asteroid_callback, size=3):
+    def __init__(self, position, create_asteroid_callback,
+                 initial_size, reduction_size=3):
         self.create_asteroid_callback = create_asteroid_callback
-        self.size = size
+        self.reduction_size = reduction_size
+        self.initial_size = initial_size
 
         size_to_scale = {
             3: 1,
             2: 0.5,
             1: 0.25,
         }
-        scale = size_to_scale[size]
-        sprite = rotozoom(load_sprite("asteroid"), 0, scale)
+
+        scale = size_to_scale[reduction_size]
+        sprite = rotozoom(load_sprite("asteroid"), 0, self.initial_size *
+                          scale)
 
         super().__init__(
             position, sprite, get_random_velocity(0.25, 1)
         )
 
-    def split(self, spaceship, ):
-        if self.size == 3:
-            spaceship.score += 300
-        elif self.size == 2:
-            spaceship.score += 200
-        elif self.size == 1:
-            spaceship.score += 100
-        if self.size > 1:
+    def split(self, spaceship):
+        size_to_score = {
+            3: 300,
+            2: 200,
+            1: 100,
+        }
+
+        spaceship.score += size_to_score[self.reduction_size]
+        if self.reduction_size > 1:
             for _ in range(2):
                 asteroid = Asteroid(
-                    self.position, self.create_asteroid_callback, self.size - 1
+                    self.position, self.create_asteroid_callback,
+                    self.initial_size, self.reduction_size - 1
                 )
                 self.create_asteroid_callback(asteroid)
 

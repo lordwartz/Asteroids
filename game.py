@@ -1,10 +1,8 @@
-#import pygame_gui
-from turtledemo.paint import switchupdown
-
 import pygame
 
 from pygame import Color, Vector2
-from utils import get_random_position, print_text_top, print_text, load_sprite
+from utils import get_random_position, print_text_top, print_text, \
+    load_sprite
 from models import Asteroid, Spaceship, Ufo
 
 FRAMERATE = 60
@@ -36,7 +34,8 @@ class Asteroids:
                 ):
                     break
 
-            self.asteroids.append(Asteroid(position, self.asteroids.append))
+            self.asteroids.append(Asteroid(position, self.asteroids.append,
+                                           get_random_size(0.8, 1.5)))
 
     def get_game_objects(self):
         game_objects = [*self.asteroids, *self.bullets, *self.ufo, *self.bullets_ufo]
@@ -196,8 +195,8 @@ def open_restart(surface):
     font = pygame.font.Font(None, 36)
     text = font.render("Restart", True, Color("white"))
     rect1 = text.get_rect()
-    rect1.center = Vector2(button_x + (button_width - text.get_width()) // 2,
-                           button_y + (button_height - text.get_height()) // 2)
+    rect1.center = Vector2(button_x + button_width // 2,
+                           button_y + button_height // 2)
 
     color_rectangle = (67, 67, 67)
 
