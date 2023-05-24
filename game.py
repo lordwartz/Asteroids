@@ -1,12 +1,12 @@
 import pygame
 
 from pygame import Color, Vector2
-from utils import get_random_position, print_text_top, print_text, \
-    load_sprite, get_random_size
+from utils import get_random_position, print_text, load_sprite, get_random_size
 from models import Asteroid, Spaceship, Ufo
 
 FRAMERATE = 60
 A = 100
+
 
 class Asteroids:
     MIN_ASTEROID_DISTANCE = 250
@@ -38,7 +38,8 @@ class Asteroids:
                                            get_random_size(0.8, 1.5)))
 
     def get_game_objects(self):
-        game_objects = [*self.asteroids, *self.bullets, *self.ufo, *self.bullets_ufo]
+        game_objects = [*self.asteroids, *self.bullets, *self.ufo,
+                        *self.bullets_ufo]
 
         if self.spaceship:
             game_objects.append(self.spaceship)
@@ -78,7 +79,6 @@ class Asteroids:
                 self.spaceship.not_accelerate()
 
     def process_game_logic(self):
-        global A
         for game_object in self.get_game_objects():
             game_object.move(self.screen)
 
@@ -128,7 +128,7 @@ class Asteroids:
             self.message = "You won!"
 
     def check_death(self):
-        if self.spaceship.lives < 0:
+        if self.spaceship.lives == 0:
             self.spaceship = None
             open_restart(self.screen)
 
@@ -150,21 +150,24 @@ class Asteroids:
             for i in range(self.spaceship.lives):
                 self.screen.blit(heart_image, (10 + i * heart_rect.width, 10))
 
-            print_text_top(self.screen, f'Score: {self.spaceship.score}',
-                           pygame.font.Font(None, 32))
+            print_text(self.screen, f'Score: {self.spaceship.score}',
+                       pygame.font.Font(None, 32),
+                       Vector2(self.screen.get_size()[0] // 2, 20))
 
         for game_object in self.get_game_objects():
             game_object.draw(self.screen)
 
         if self.message:
-            print_text(self.screen, self.message, self.font)
+            print_text(self.screen, self.message, self.font,
+                       Vector2(self.screen.get_size()) / 2)
 
         pygame.display.flip()
         self.clock.tick(FRAMERATE)
 
     def pause_game(self):
         pygame.display.set_caption("Paused")
-        print_text(self.screen, "PAUSED", self.font)
+        print_text(self.screen, "PAUSED", self.font,
+                   Vector2(self.screen.get_size()) / 2)
         pygame.display.flip()
         paused = True
         while paused:

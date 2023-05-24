@@ -39,19 +39,10 @@ def get_random_size(min_size, max_size):
     return size
 
 
-def print_text(surface, text, font, color=Color("red")):
+def print_text(surface, text, font, rect_center, color=Color("red")):
     text_surface = font.render(text, True, color)
 
     rect = text_surface.get_rect()
-    rect.center = Vector2(surface.get_size()) / 2
-
-    surface.blit(text_surface, rect)
-
-
-def print_text_top(surface, text, font, color=Color("red")):
-    text_surface = font.render(text, True, color)
-
-    rect = text_surface.get_rect()
-    rect.center = Vector2(surface.get_size()[0] // 2, 20)
+    rect.center = rect_center
 
     surface.blit(text_surface, rect)
