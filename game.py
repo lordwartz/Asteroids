@@ -2,7 +2,7 @@ import pygame
 
 from pygame import Color, Vector2
 from utils import get_random_position, print_text_top, print_text, \
-    load_sprite
+    load_sprite, get_random_size
 from models import Asteroid, Spaceship, Ufo
 
 FRAMERATE = 60
