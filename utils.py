@@ -34,6 +34,11 @@ def get_random_velocity(min_speed, max_speed):
     return Vector2(speed, 0).rotate(angle)
 
 
+def get_random_size(min_size, max_size):
+    size = random.uniform(min_size, max_size)
+    return size
+
+
 def print_text(surface, text, font, color=Color("red")):
     text_surface = font.render(text, True, color)
 
