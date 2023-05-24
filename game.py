@@ -1,60 +1,35 @@
 import pygame
-
 from pygame import Color, Vector2
 from utils import get_random_position, print_text, load_sprite, get_random_size
 from models import Asteroid, Spaceship, Ufo
 
-FRAMERATE = 60
-A = 100
-
 
 class Asteroids:
     MIN_ASTEROID_DISTANCE = 250
-    MIN_UFO_DISTANCE = 300
+    MIN_UFO_DISTANCE = 250
+    FRAMERATE = 60
 
     def __init__(self):
-        self.init_pygame()
+        init_pygame()
         self.screen = pygame.display.set_mode((1500, 800))
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(None, 64)
-        self.message = ""
+        self.pause_message = ""
 
         self.asteroids = []
         self.bullets = []
         self.bullets_ufo = []
-        self.spaceship = Spaceship((400, 300), self.bullets.append)
         self.ufo = []
+        self.standard_spaceship_position = Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2)
+        self.spaceship = Spaceship(self.standard_spaceship_position, self.bullets.append)
 
-        for _ in range(6):
-            while True:
-                position = get_random_position(self.screen)
-                if (
-                        position.distance_to(self.spaceship.position)
-                        > self.MIN_ASTEROID_DISTANCE
-                ):
-                    break
-
-            self.asteroids.append(Asteroid(position, self.asteroids.append,
-                                           get_random_size(0.8, 1.5)))
-
-    def get_game_objects(self):
-        game_objects = [*self.asteroids, *self.bullets, *self.ufo,
-                        *self.bullets_ufo]
-
-        if self.spaceship:
-            game_objects.append(self.spaceship)
-
-        return game_objects
+        self.generate_asteroids()
 
     def main_loop(self):
         while True:
             self.handle_input()
             self.process_game_logic()
             self.draw()
-
-    def init_pygame(self):
-        pygame.init()
-        pygame.display.set_caption("Asteroids")
 
     def handle_input(self):
         for event in pygame.event.get():
@@ -79,68 +54,21 @@ class Asteroids:
                 self.spaceship.not_accelerate()
 
     def process_game_logic(self):
-        for game_object in self.get_game_objects():
-            game_object.move(self.screen)
-
-        if self.ufo:
-            for ufo in self.ufo[:]:
-                if ufo.current_frame % ufo.BULLET_FREQUENCY < 1:
-                    ufo.shoot()
-
-        if self.spaceship:
-            for asteroid in self.asteroids:
-                if asteroid.collides_with(self.spaceship):
-                    self.spaceship.position = (400, 300)
-                    self.spaceship.lives -= 1
-                    self.check_death()
-
-        if self.spaceship:
-            for bullet in self.bullets[:]:
-                for asteroid in self.asteroids[:]:
-                    if asteroid.collides_with(bullet):
-                        self.asteroids.remove(asteroid)
-                        self.bullets.remove(bullet)
-                        asteroid.split(self.spaceship)
-                        break
-
-            for bullet in self.bullets_ufo[:]:
-                if bullet.collides_with(self.spaceship):
-                    self.spaceship.lives -= 1
-                    self.check_death()
-                    self.bullets_ufo.remove(bullet)
-                    break
-
-            for bullet in self.bullets[:]:
-                for ufo in self.ufo[:]:
-                    if bullet.collides_with(ufo):
-                        self.ufo.remove(ufo)
-                        self.bullets.remove(bullet)
-
-        for bullet in self.bullets[:]:
-            if not self.screen.get_rect().collidepoint(bullet.position):
-                self.bullets.remove(bullet)
-
-        for ufo in self.ufo[:]:
-            if not self.screen.get_rect().collidepoint(ufo.position):
-                self.ufo.remove(ufo)
-
-        if not self.asteroids and self.spaceship:
-            self.message = "You won!"
-
-    def check_death(self):
-        if self.spaceship.lives == 0:
-            self.spaceship = None
-            open_restart(self.screen)
+        self.move_objects()
+        self.process_bullets_logic()
+        self.process_ufo_logic()
+        self.check_spaceship_collision()
+        self.check_ufo_collision()
+        self.check_asteroids_collision()
+        if not self.asteroids:
+            self.pause_message = "You won!"
 
     def draw(self):
         self.screen.fill((0, 0, 0))
         if self.spaceship and len(self.ufo) < 1:
             while True:
                 position = get_random_position(self.screen)
-                if (
-                        position.distance_to(self.spaceship.position)
-                        > self.MIN_UFO_DISTANCE
-                ):
+                if position.distance_to(self.spaceship.position) > self.MIN_UFO_DISTANCE:
                     break
             self.ufo.append(Ufo(position, self.bullets_ufo.append))
 
@@ -157,12 +85,86 @@ class Asteroids:
         for game_object in self.get_game_objects():
             game_object.draw(self.screen)
 
-        if self.message:
-            print_text(self.screen, self.message, self.font,
+        if self.pause_message:
+            print_text(self.screen, self.pause_message, self.font,
                        Vector2(self.screen.get_size()) / 2)
 
         pygame.display.flip()
-        self.clock.tick(FRAMERATE)
+        self.clock.tick(self.FRAMERATE)
+
+    def generate_asteroids(self):
+        for _ in range(6):
+            while True:
+                position = get_random_position(self.screen)
+                if position.distance_to(self.spaceship.position) > self.MIN_ASTEROID_DISTANCE:
+                    break
+
+            self.asteroids.append(Asteroid(position, self.asteroids.append, get_random_size(0.8, 1.5)))
+
+    def get_game_objects(self):
+        game_objects = [*self.asteroids, *self.bullets, *self.ufo, *self.bullets_ufo]
+        if self.spaceship:
+            game_objects.append(self.spaceship)
+
+        return game_objects
+
+    def check_spaceship_collision(self):
+        for asteroid in self.asteroids[:]:
+            if asteroid.collides_with(self.spaceship):
+                self.spaceship.position = self.standard_spaceship_position
+                self.spaceship.lives -= 1
+                self.check_death()
+        for bullet in self.bullets_ufo[:]:
+            if bullet.collides_with(self.spaceship):
+                self.spaceship.lives -= 1
+                self.check_death()
+                self.bullets_ufo.remove(bullet)
+                break
+
+    def process_bullets_logic(self):
+        for bullet in self.bullets[:]:
+            if not self.screen.get_rect().collidepoint(bullet.position):
+                self.bullets.remove(bullet)
+
+    def check_ufo_collision(self):
+        for bullet in self.bullets[:]:
+            for ufo in self.ufo[:]:
+                if bullet.collides_with(ufo):
+                    self.ufo.remove(ufo)
+                    self.bullets.remove(bullet)
+
+    def check_asteroids_collision(self):
+        for asteroid in self.asteroids[:]:
+            for bullet in self.bullets[:]:
+                if asteroid.collides_with(bullet):
+                    self.asteroids.remove(asteroid)
+                    self.bullets.remove(bullet)
+                    asteroid.split(self.spaceship)
+                    break
+
+    def check_spaceship_asteroids_collision(self):
+        for asteroid in self.asteroids[:]:
+            if asteroid.collides_with(self.spaceship):
+                self.spaceship.position = self.standard_spaceship_position
+                self.spaceship.lives -= 1
+                self.check_death()
+
+    def process_ufo_logic(self):
+        if self.ufo:
+            for ufo in self.ufo[:]:
+                if ufo.current_frame % ufo.BULLET_FREQUENCY == 0:
+                    ufo.shoot()
+                if not self.screen.get_rect().collidepoint(ufo.position):
+                    self.ufo.remove(ufo)
+
+    def move_objects(self):
+        for game_object in self.get_game_objects():
+            game_object.move(self.screen)
+
+    def check_death(self):
+        if self.spaceship.lives == 0:
+            self.spaceship = None
+            open_restart(self.screen)
 
     def pause_game(self):
         pygame.display.set_caption("Paused")
@@ -179,6 +181,11 @@ class Asteroids:
                         pygame.display.set_caption("Asteroids")
                         paused = False
                         break
+
+
+def init_pygame():
+    pygame.init()
+    pygame.display.set_caption("Asteroids")
 
 
 def open_restart(surface):
