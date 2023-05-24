@@ -14,7 +14,7 @@ class Asteroids:
 
     def __init__(self):
         self.init_pygame()
-        self.screen = pygame.display.set_mode((800, 600))
+        self.screen = pygame.display.set_mode((1500, 800))
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(None, 64)
         self.message = ""
