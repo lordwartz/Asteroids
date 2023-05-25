@@ -1,5 +1,4 @@
 import random
-
 import pygame
 from pygame import Color, Vector2
 from utils import get_random_position, print_text, load_sprite, get_random_size
@@ -152,7 +151,8 @@ class Asteroids:
         #              (1, 0): 1,
         #              (-1, 0): 1,
         #              (0, -1): 1}
-        if (self.current_frame % (random.randrange(10, 20) * self.FRAMERATE)) == self.FRAMERATE * 4:
+        if (self.current_frame % (random.randrange(10, 20)
+                                  * self.FRAMERATE)) == self.FRAMERATE * 4:
             while True:
                 position = get_random_position(self.screen)
                 if position.distance_to(
@@ -166,7 +166,6 @@ class Asteroids:
                     ufo.shoot()
                 if not self.screen.get_rect().collidepoint(ufo.position):
                     self.ufo.remove(ufo)
-
 
     def move_objects(self):
         for game_object in self.get_game_objects():
