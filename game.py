@@ -14,14 +14,18 @@ class Asteroids:
         self.screen = pygame.display.set_mode((1500, 800))
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(None, 64)
-        self.pause_message = ""
+        self.win_message = ""
 
         self.asteroids = []
         self.bullets = []
         self.bullets_ufo = []
         self.ufo = []
-        self.standard_spaceship_position = Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2)
-        self.spaceship = Spaceship(self.standard_spaceship_position, self.bullets.append)
+        self.standard_spaceship_position = Vector2(
+            self.screen.get_width() / 2,
+            self.screen.get_height() / 2
+        )
+        self.spaceship = Spaceship(self.standard_spaceship_position,
+                                   self.bullets.append)
 
         self.generate_asteroids()
 
@@ -61,14 +65,15 @@ class Asteroids:
         self.check_ufo_collision()
         self.check_asteroids_collision()
         if not self.asteroids:
-            self.pause_message = "You won!"
+            self.win_message = "You won!"
 
     def draw(self):
         self.screen.fill((0, 0, 0))
         if self.spaceship and len(self.ufo) < 1:
             while True:
                 position = get_random_position(self.screen)
-                if position.distance_to(self.spaceship.position) > self.MIN_UFO_DISTANCE:
+                if position.distance_to(
+                        self.spaceship.position) > self.MIN_UFO_DISTANCE:
                     break
             self.ufo.append(Ufo(position, self.bullets_ufo.append))
 
@@ -85,8 +90,8 @@ class Asteroids:
         for game_object in self.get_game_objects():
             game_object.draw(self.screen)
 
-        if self.pause_message:
-            print_text(self.screen, self.pause_message, self.font,
+        if self.win_message:
+            print_text(self.screen, self.win_message, self.font,
                        Vector2(self.screen.get_size()) / 2)
 
         pygame.display.flip()
@@ -96,13 +101,16 @@ class Asteroids:
         for _ in range(6):
             while True:
                 position = get_random_position(self.screen)
-                if position.distance_to(self.spaceship.position) > self.MIN_ASTEROID_DISTANCE:
+                if position.distance_to(self.spaceship.position) \
+                        > self.MIN_ASTEROID_DISTANCE:
                     break
 
-            self.asteroids.append(Asteroid(position, self.asteroids.append, get_random_size(0.8, 1.5)))
+            self.asteroids.append(Asteroid(position, self.asteroids.append,
+                                           get_random_size(0.8, 1.5)))
 
     def get_game_objects(self):
-        game_objects = [*self.asteroids, *self.bullets, *self.ufo, *self.bullets_ufo]
+        game_objects = [*self.asteroids, *self.bullets, *self.ufo,
+                        *self.bullets_ufo]
         if self.spaceship:
             game_objects.append(self.spaceship)
 

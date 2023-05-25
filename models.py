@@ -131,6 +131,7 @@ class Ufo(GameObject):
         self.current_frame += 1
 
     def shoot(self):
-        bullet_velocity = get_random_velocity(1, 2) * self.BULLET_SPEED + self.velocity
+        bullet_velocity = get_random_velocity(1, 2) * self.BULLET_SPEED \
+                          + self.velocity
         bullet = Bullet(self.position, bullet_velocity, False)
         self.create_bullet_callback(bullet)
