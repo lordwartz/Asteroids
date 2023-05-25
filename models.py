@@ -1,3 +1,5 @@
+import random
+
 from pygame.math import Vector2
 from pygame.transform import rotozoom
 
@@ -121,10 +123,15 @@ class Ufo(GameObject):
     def __init__(self, position, create_bullet_callback):
         self.create_bullet_callback = create_bullet_callback
         self.current_frame = 0
-        self.direction = Vector2(0, -1)
+        directions = {0: (0, 1),
+                      1: (1, 0),
+                      2: (-1, 0),
+                      3: (0, -1)}
+
+        self.direction = directions[random.randrange(4)]
 
         sprite = rotozoom(load_sprite("ufo"), 0, 1)
-        super().__init__(position, sprite, get_random_velocity(1, 2))
+        super().__init__(position, sprite, self.direction)
 
     def move(self, surface):
         self.position = self.position + self.velocity

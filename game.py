@@ -1,3 +1,5 @@
+import random
+
 import pygame
 from pygame import Color, Vector2
 from utils import get_random_position, print_text, load_sprite, get_random_size
@@ -13,6 +15,7 @@ class Asteroids:
         init_pygame()
         self.screen = pygame.display.set_mode((1500, 800))
         self.clock = pygame.time.Clock()
+        self.current_frame = 0
         self.font = pygame.font.Font(None, 64)
         self.win_message = ""
 
@@ -69,13 +72,6 @@ class Asteroids:
 
     def draw(self):
         self.screen.fill((0, 0, 0))
-        if self.spaceship and len(self.ufo) < 1:
-            while True:
-                position = get_random_position(self.screen)
-                if position.distance_to(
-                        self.spaceship.position) > self.MIN_UFO_DISTANCE:
-                    break
-            self.ufo.append(Ufo(position, self.bullets_ufo.append))
 
         if self.spaceship:
             heart_image = load_sprite("heart")
@@ -96,6 +92,7 @@ class Asteroids:
 
         pygame.display.flip()
         self.clock.tick(self.FRAMERATE)
+        self.current_frame += 1
 
     def generate_asteroids(self):
         for _ in range(6):
@@ -150,20 +147,26 @@ class Asteroids:
                     asteroid.split(self.spaceship)
                     break
 
-    def check_spaceship_asteroids_collision(self):
-        for asteroid in self.asteroids[:]:
-            if asteroid.collides_with(self.spaceship):
-                self.spaceship.position = self.standard_spaceship_position
-                self.spaceship.lives -= 1
-                self.check_death()
-
     def process_ufo_logic(self):
+        #init_locations = {(0, 1): (random.randrange(get)),
+        #              (1, 0): 1,
+        #              (-1, 0): 1,
+        #              (0, -1): 1}
+        if (self.current_frame % (random.randrange(10, 20) * self.FRAMERATE)) == self.FRAMERATE * 4:
+            while True:
+                position = get_random_position(self.screen)
+                if position.distance_to(
+                        self.spaceship.position) > self.MIN_UFO_DISTANCE:
+                    break
+            self.ufo.append(Ufo(position, self.bullets_ufo.append))
+
         if self.ufo:
             for ufo in self.ufo[:]:
                 if ufo.current_frame % ufo.BULLET_FREQUENCY == 0:
                     ufo.shoot()
                 if not self.screen.get_rect().collidepoint(ufo.position):
                     self.ufo.remove(ufo)
+
 
     def move_objects(self):
         for game_object in self.get_game_objects():
