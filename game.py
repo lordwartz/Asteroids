@@ -199,27 +199,14 @@ def init_pygame():
 def open_restart(surface):
     surface.fill((0, 0, 0))
 
-    font_you_lose = pygame.font.Font(None, 100)
-    text_you_lose = font_you_lose.render("You lose!", True, Color("red"))
-
-    rect = text_you_lose.get_rect()
-    rect.center = Vector2(surface.get_size()[0] // 2, 150)
-
     button_width = 200
     button_height = 100
     button_x = (surface.get_size()[0] - button_width) // 2
     button_y = (surface.get_size()[1] - button_height) // 2
 
-    font = pygame.font.Font(None, 36)
-    text = font.render("Restart", True, Color("white"))
-    rect1 = text.get_rect()
-    rect1.center = Vector2(button_x + button_width // 2,
-                           button_y + button_height // 2)
-
     color_rectangle = (67, 67, 67)
 
-    running = True
-    while running:
+    while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit()
@@ -235,8 +222,11 @@ def open_restart(surface):
         surface.fill(Color("black"))
         pygame.draw.rect(surface, color_rectangle,
                          (button_x, button_y, button_width, button_height))
-        surface.blit(text, rect1)
-        surface.blit(text_you_lose, rect)
+        print_text(surface, "You lose", pygame.font.Font(None, 100),
+                   Vector2(surface.get_size()[0] // 2, 150), Color("red"))
+        print_text(surface, "Restart", pygame.font.Font(None, 36),
+                   Vector2(button_x + button_width // 2,
+                           button_y + button_height // 2), Color("white"))
         pygame.display.flip()
 
 
