@@ -147,18 +147,21 @@ class Asteroids:
                     break
 
     def process_ufo_logic(self):
-        #init_locations = {(0, 1): (random.randrange(get)),
-        #              (1, 0): 1,
-        #              (-1, 0): 1,
-        #              (0, -1): 1}
-        if (self.current_frame % (random.randrange(10, 20)
+        directions = {0: (0, 1),
+                      1: (1, 0),
+                      2: (-1, 0),
+                      3: (0, -1)}
+        (random_x, random_y) = [random.randrange(self.screen.get_width()),
+                                random.randrange(self.screen.get_height())]
+        ufo_spawn = {(0, 1): (random_x, 0),
+                     (1, 0): (0, random_y),
+                     (-1, 0): (self.screen.get_width() - 1, random_y),
+                     (0, -1): (random_x, self.screen.get_height() - 1)}
+        if (self.current_frame % (random.randrange(8, 12)
                                   * self.FRAMERATE)) == self.FRAMERATE * 4:
-            while True:
-                position = get_random_position(self.screen)
-                if position.distance_to(
-                        self.spaceship.position) > self.MIN_UFO_DISTANCE:
-                    break
-            self.ufo.append(Ufo(position, self.bullets_ufo.append))
+            direction = directions[random.randrange(4)]
+            position = ufo_spawn[direction]
+            self.ufo.append(Ufo(position, direction, self.bullets_ufo.append))
 
         if self.ufo:
             for ufo in self.ufo[:]:
