@@ -65,7 +65,7 @@ class Asteroids:
         self.check_ufo_collision()
         self.check_asteroids_collision()
         if not self.asteroids:
-            self.win_message = "You won!"
+            open_restart(self.screen, "You win!")
 
     def draw(self):
         self.screen.fill((0, 0, 0))
@@ -172,7 +172,7 @@ class Asteroids:
     def check_death(self):
         if self.spaceship.lives == 0:
             self.spaceship = None
-            open_restart(self.screen)
+            open_restart(self.screen, "You lose!")
 
     def pause_game(self):
         pygame.display.set_caption("Paused")
@@ -196,13 +196,18 @@ def init_pygame():
     pygame.display.set_caption("Asteroids")
 
 
-def open_restart(surface):
+def open_restart(surface, text_message):
     surface.fill((0, 0, 0))
 
     button_width = 200
     button_height = 100
     button_x = (surface.get_size()[0] - button_width) // 2
     button_y = (surface.get_size()[1] - button_height) // 2
+
+    if text_message == "You win!":
+        text_message_color = Color("green")
+    else:
+        text_message_color = Color("red")
 
     color_rectangle = (67, 67, 67)
 
@@ -222,8 +227,9 @@ def open_restart(surface):
         surface.fill(Color("black"))
         pygame.draw.rect(surface, color_rectangle,
                          (button_x, button_y, button_width, button_height))
-        print_text(surface, "You lose", pygame.font.Font(None, 100),
-                   Vector2(surface.get_size()[0] // 2, 150), Color("red"))
+        print_text(surface, text_message, pygame.font.Font(None, 100),
+                   Vector2(surface.get_size()[0] // 2, 150),
+                   text_message_color)
         print_text(surface, "Restart", pygame.font.Font(None, 36),
                    Vector2(button_x + button_width // 2,
                            button_y + button_height // 2), Color("white"))
