@@ -3,6 +3,16 @@ import pygame
 from pygame import Color, Vector2
 from utils import get_random_position, print_text, load_sprite, get_random_size
 from models import Asteroid, Spaceship, Ufo
+from enum import Enum
+
+
+class GameState(Enum):
+    MAIN_MENU = 0,
+    GAME = 1,
+    PAUSE = 2
+    WIN_MENU = 3,
+    LOSE_MENU = 4,
+    EXIT = 5
 
 
 class Asteroids:
@@ -18,6 +28,7 @@ class Asteroids:
         self.font = pygame.font.Font(None, 64)
         self.win_message = ""
 
+        self.game_state = GameState.MAIN_MENU
         self.asteroids = []
         self.bullets = []
         self.bullets_ufo = []
@@ -32,10 +43,20 @@ class Asteroids:
         self.generate_asteroids()
 
     def main_loop(self):
-        while True:
-            self.handle_input()
-            self.process_game_logic()
-            self.draw()
+        while self.game_state is not GameState.EXIT:
+            match self.game_state:
+                case GameState.MAIN_MENU:
+                    self.show_main_menu()
+                case GameState.GAME:
+                    self.handle_input()
+                    self.process_game_logic()
+                    self.draw()
+                case GameState.PAUSE:
+                    self.pause()
+                case GameState.WIN_MENU:
+                    self.show_win_menu()
+                case GameState.LOSE_MENU:
+                    self.show_lose_menu()
 
     def handle_input(self):
         for event in pygame.event.get():
@@ -63,11 +84,10 @@ class Asteroids:
         self.move_objects()
         self.process_bullets_logic()
         self.process_ufo_logic()
-        self.check_spaceship_collision()
         self.check_ufo_collision()
         self.check_asteroids_collision()
-        if not self.asteroids:
-            open_restart(self.screen, "You win!")
+        self.check_spaceship_collision()
+        self.check_game_state()
 
     def draw(self):
         self.screen.fill((0, 0, 0))
@@ -114,12 +134,12 @@ class Asteroids:
 
     def check_spaceship_collision(self):
         for asteroid in self.asteroids[:]:
-            if asteroid.collides_with(self.spaceship):
+            if self.spaceship and asteroid.collides_with(self.spaceship):
                 self.spaceship.position = self.standard_spaceship_position
                 self.spaceship.lives -= 1
                 self.check_death()
         for bullet in self.bullets_ufo[:]:
-            if bullet.collides_with(self.spaceship):
+            if self.spaceship and bullet.collides_with(self.spaceship):
                 self.spaceship.lives -= 1
                 self.check_death()
                 self.bullets_ufo.remove(bullet)
@@ -177,7 +197,6 @@ class Asteroids:
     def check_death(self):
         if self.spaceship.lives == 0:
             self.spaceship = None
-            open_restart(self.screen, "You lose!")
 
     def pause_game(self):
         pygame.display.set_caption("Paused")
@@ -195,52 +214,112 @@ class Asteroids:
                         paused = False
                         break
 
+    def pause(self):
+        pass
+
+    def show_main_menu(self):
+        pygame.display.set_caption("Menu")
+        print_text(self.screen, "THE ASTEROIDS", self.font,
+                   Vector2(self.screen.get_size()) / 2)
+        pygame.display.flip()
+        while self.game_state is GameState.MAIN_MENU:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    quit()
+                elif event.type == pygame.KEYDOWN:
+                    match event.key:
+                        case pygame.K_RETURN:
+                            self.game_state = GameState.GAME
+                            pygame.display.set_caption("Asteroids")
+                            break
+                        case pygame.K_ESCAPE:
+                            quit()
+
+    def show_win_menu(self):
+        surface = self.screen
+        surface.fill((0, 0, 0))
+
+        button_width = 200
+        button_height = 100
+        button_x = (surface.get_size()[0] - button_width) // 2
+        button_y = (surface.get_size()[1] - button_height) // 2
+
+        text_message_color = Color("green")
+        color_rectangle = (67, 67, 67)
+        while self.game_state is GameState.WIN_MENU:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    quit()
+                mouse_pos = pygame.mouse.get_pos()
+                if button_x <= mouse_pos[0] <= button_x + button_width \
+                        and button_y <= mouse_pos[1] \
+                        <= button_y + button_height:
+                    color_rectangle = (82, 82, 82)
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        restart_game()
+                else:
+                    color_rectangle = (67, 67, 67)
+
+            surface.fill(Color("black"))
+            pygame.draw.rect(surface, color_rectangle,
+                             (button_x, button_y, button_width, button_height))
+            print_text(surface, "YOU WIN", pygame.font.Font(None, 100),
+                       Vector2(surface.get_size()[0] // 2, 150),
+                       text_message_color)
+            print_text(surface, "Restart", pygame.font.Font(None, 36),
+                       Vector2(button_x + button_width // 2,
+                               button_y + button_height // 2), Color("white"))
+            pygame.display.flip()
+
+    def show_lose_menu(self):
+        surface = self.screen
+        surface.fill((0, 0, 0))
+
+        button_width = 200
+        button_height = 100
+        button_x = (surface.get_size()[0] - button_width) // 2
+        button_y = (surface.get_size()[1] - button_height) // 2
+
+        text_message_color = Color("red")
+        color_rectangle = (67, 67, 67)
+        while self.game_state is GameState.LOSE_MENU:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    quit()
+                mouse_pos = pygame.mouse.get_pos()
+                if button_x <= mouse_pos[0] <= button_x + button_width \
+                        and button_y <= mouse_pos[1] \
+                        <= button_y + button_height:
+                    color_rectangle = (82, 82, 82)
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        restart_game()
+                else:
+                    color_rectangle = (67, 67, 67)
+
+            surface.fill(Color("black"))
+            pygame.draw.rect(surface, color_rectangle,
+                             (button_x, button_y, button_width, button_height))
+            print_text(surface, "YOU LOSE", pygame.font.Font(None, 100),
+                       Vector2(surface.get_size()[0] // 2, 150),
+                       text_message_color)
+            print_text(surface, "Restart", pygame.font.Font(None, 36),
+                       Vector2(button_x + button_width // 2,
+                               button_y + button_height // 2), Color("white"))
+            pygame.display.flip()
+
+    def check_game_state(self):
+        if not self.spaceship:
+            self.game_state = GameState.LOSE_MENU
+        elif not self.asteroids:
+            self.game_state = GameState.WIN_MENU
+
 
 def init_pygame():
     pygame.init()
     pygame.display.set_caption("Asteroids")
 
 
-def open_restart(surface, text_message):
-    surface.fill((0, 0, 0))
-
-    button_width = 200
-    button_height = 100
-    button_x = (surface.get_size()[0] - button_width) // 2
-    button_y = (surface.get_size()[1] - button_height) // 2
-
-    if text_message == "You win!":
-        text_message_color = Color("green")
-    else:
-        text_message_color = Color("red")
-
-    color_rectangle = (67, 67, 67)
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                quit()
-            mouse_pos = pygame.mouse.get_pos()
-            if button_x <= mouse_pos[0] <= button_x + button_width \
-                    and button_y <= mouse_pos[1] <= button_y + button_height:
-                color_rectangle = (82, 82, 82)
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    restart_game()
-            else:
-                color_rectangle = (67, 67, 67)
-
-        surface.fill(Color("black"))
-        pygame.draw.rect(surface, color_rectangle,
-                         (button_x, button_y, button_width, button_height))
-        print_text(surface, text_message, pygame.font.Font(None, 100),
-                   Vector2(surface.get_size()[0] // 2, 150),
-                   text_message_color)
-        print_text(surface, "Restart", pygame.font.Font(None, 36),
-                   Vector2(button_x + button_width // 2,
-                           button_y + button_height // 2), Color("white"))
-        pygame.display.flip()
-
-
 def restart_game():
     asteroids = Asteroids()
+    asteroids.game_state = GameState.GAME
     asteroids.main_loop()

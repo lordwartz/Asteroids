@@ -21,8 +21,11 @@ class GameObject:
         self.position = wrap_position(self.position + self.velocity, surface)
 
     def collides_with(self, other_obj):
-        distance = self.position.distance_to(other_obj.position)
-        return distance < self.radius + other_obj.radius
+        if self and other_obj:
+            distance = self.position.distance_to(other_obj.position)
+            return distance < self.radius + other_obj.radius
+        else:
+            raise Exception("Unable to check collision for non-existing object")
 
 
 class Spaceship(GameObject):
