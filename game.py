@@ -12,7 +12,7 @@ class GameState(Enum):
     PAUSE = 2
     WIN_MENU = 3,
     LOSE_MENU = 4,
-    EXIT = 5
+    QUIT = 5
 
 
 class Asteroids:
@@ -43,7 +43,7 @@ class Asteroids:
         self.generate_asteroids()
 
     def main_loop(self):
-        while self.game_state is not GameState.EXIT:
+        while self.game_state is not GameState.QUIT:
             match self.game_state:
                 case GameState.MAIN_MENU:
                     self.show_main_menu()
@@ -52,19 +52,23 @@ class Asteroids:
                     self.process_game_logic()
                     self.draw()
                 case GameState.PAUSE:
-                    self.pause()
+                    self.pause_game()
                 case GameState.WIN_MENU:
                     self.show_win_menu()
                 case GameState.LOSE_MENU:
                     self.show_lose_menu()
+        else:
+            quit()
 
     def handle_input(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                quit()
+                self.game_state = GameState.QUIT
+                return
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.pause_game()
+                    self.game_state = GameState.PAUSE
+                    return
                 elif self.spaceship and event.key == pygame.K_SPACE:
                     self.spaceship.shoot()
 
@@ -203,19 +207,16 @@ class Asteroids:
         print_text(self.screen, "PAUSED", self.font,
                    Vector2(self.screen.get_size()) / 2)
         pygame.display.flip()
-        paused = True
-        while paused:
+        while self.game_state is GameState.PAUSE:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    quit()
+                    self.game_state = GameState.QUIT
+                    return
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        pygame.display.set_caption("Asteroids")
-                        paused = False
-                        break
-
-    def pause(self):
-        pass
+                        if event.key == pygame.K_ESCAPE:
+                            pygame.display.set_caption("Asteroids")
+                            self.game_state = GameState.GAME
+                            break
 
     def show_main_menu(self):
         pygame.display.set_caption("Menu")
@@ -225,7 +226,8 @@ class Asteroids:
         while self.game_state is GameState.MAIN_MENU:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    quit()
+                    self.game_state = GameState.QUIT
+                    return
                 elif event.type == pygame.KEYDOWN:
                     match event.key:
                         case pygame.K_RETURN:
@@ -233,7 +235,8 @@ class Asteroids:
                             pygame.display.set_caption("Asteroids")
                             break
                         case pygame.K_ESCAPE:
-                            quit()
+                            self.game_state = GameState.QUIT
+                            return
 
     def show_win_menu(self):
         surface = self.screen
@@ -249,7 +252,8 @@ class Asteroids:
         while self.game_state is GameState.WIN_MENU:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    quit()
+                    self.game_state = GameState.QUIT
+                    return
                 mouse_pos = pygame.mouse.get_pos()
                 if button_x <= mouse_pos[0] <= button_x + button_width \
                         and button_y <= mouse_pos[1] \
@@ -285,7 +289,8 @@ class Asteroids:
         while self.game_state is GameState.LOSE_MENU:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    quit()
+                    self.game_state = GameState.QUIT
+                    return
                 mouse_pos = pygame.mouse.get_pos()
                 if button_x <= mouse_pos[0] <= button_x + button_width \
                         and button_y <= mouse_pos[1] \
