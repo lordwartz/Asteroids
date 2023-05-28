@@ -88,6 +88,7 @@ class Asteroids:
         self.__move_objects()
         self.__process_bullets_logic()
         self.__process_ufo_logic()
+        self.__check_bullets_collision()
         self.__check_ufo_collision()
         self.__check_asteroids_collision()
         self._check_spaceship_collision()
@@ -138,21 +139,29 @@ class Asteroids:
 
     def _check_spaceship_collision(self):
         for asteroid in self.asteroids[:]:
-            if self.spaceship and asteroid.collides_with(self.spaceship):
-                self.spaceship.position = self.standard_spaceship_position
-                self.spaceship.lives -= 1
-                self.__check_death()
+            self.__spaceship_wrecked_logic(asteroid)
         for bullet in self.bullets_ufo[:]:
-            if self.spaceship and bullet.collides_with(self.spaceship):
-                self.spaceship.lives -= 1
-                self.__check_death()
-                self.bullets_ufo.remove(bullet)
-                break
+            self.__spaceship_wrecked_logic(bullet)
+        for ufo in self.ufo[:]:
+            self.__spaceship_wrecked_logic(ufo)
+
+    def __spaceship_wrecked_logic(self, collision_object):
+        if self.spaceship and collision_object.collides_with(self.spaceship):
+            self.spaceship.position = self.standard_spaceship_position
+            self.spaceship.lives -= 1
+            self.__check_death()
 
     def __process_bullets_logic(self):
         for bullet in self.bullets[:]:
             if not self.screen.get_rect().collidepoint(bullet.position):
                 self.bullets.remove(bullet)
+
+    def __check_bullets_collision(self):
+        for bullet in self.bullets[:]:
+            for bullet_ufo in self.bullets_ufo[:]:
+                if bullet.collides_with(bullet_ufo):
+                    self.bullets.remove(bullet)
+                    self.bullets_ufo.remove(bullet_ufo)
 
     def __check_ufo_collision(self):
         for bullet in self.bullets[:]:
