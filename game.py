@@ -1,5 +1,7 @@
 import random
 import pygame
+from pygame_widgets import Mouse
+from pygame_widgets.button import Button
 from pygame import Color, Vector2
 from utils import get_random_position, print_text, load_sprite, get_random_size
 from models import Asteroid, Spaceship, Ufo
@@ -13,6 +15,10 @@ class GameState(Enum):
     WIN_MENU = 3,
     LOSE_MENU = 4,
     QUIT = 5
+
+
+def change_game_state(self, game_state):
+    self.game_state = game_state
 
 
 class Asteroids:
@@ -39,7 +45,6 @@ class Asteroids:
         )
         self.spaceship = Spaceship(self.standard_spaceship_position,
                                    self.bullets.append)
-
         self.__generate_asteroids()
 
     def start_game(self):
@@ -108,10 +113,6 @@ class Asteroids:
 
         for game_object in self.__get_game_objects():
             game_object.draw(self.screen)
-
-        if self.win_message:
-            print_text(self.screen, self.win_message, self.font,
-                       Vector2(self.screen.get_size()) / 2)
 
         pygame.display.flip()
         self.clock.tick(self.FRAMERATE)
@@ -213,17 +214,34 @@ class Asteroids:
                     self.game_state = GameState.QUIT
                     return
                 elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_ESCAPE:
-                            pygame.display.set_caption("Asteroids")
-                            self.game_state = GameState.GAME
-                            break
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.display.set_caption("Asteroids")
+                        self.game_state = GameState.GAME
+                        break
 
     def __show_main_menu(self):
         pygame.display.set_caption("Menu")
         print_text(self.screen, "THE ASTEROIDS", self.font,
                    Vector2(self.screen.get_size()) / 2)
+        menu_buttons = []
+        button_size = [200, 50]
+        menu_buttons.append(
+            Button(self.screen,
+                   self.screen.get_width() // 2 - button_size[0] // 2,
+                   self.screen.get_height() // 10 * 6 - button_size[1] // 2,
+                   button_size[0], button_size[1],
+                   text='PLAY', fontSize=40,
+                   inactiveColour=(255, 0, 0),
+                   pressedColour=(0, 255, 0), radius=20,
+                   onClick=lambda: change_game_state(self, GameState.GAME))
+        )
         pygame.display.flip()
         while self.game_state is GameState.MAIN_MENU:
+            Mouse.updateMouseState()
+            for button in menu_buttons:
+                button.listen(pygame.event.get())
+                button.draw()
+                pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.game_state = GameState.QUIT
@@ -327,3 +345,4 @@ def init_pygame():
 def restart_game():
     asteroids = Asteroids()
     asteroids.game_state = GameState.GAME
+    asteroids.start_game()
