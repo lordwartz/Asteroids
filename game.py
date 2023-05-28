@@ -260,7 +260,8 @@ class Asteroids:
                         <= button_y + button_height:
                     color_rectangle = (82, 82, 82)
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        restart_game()
+                        restart_game(self)
+                        break
                 else:
                     color_rectangle = (67, 67, 67)
 
@@ -297,7 +298,8 @@ class Asteroids:
                         <= button_y + button_height:
                     color_rectangle = (82, 82, 82)
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        restart_game()
+                        restart_game(self)
+                        break
                 else:
                     color_rectangle = (67, 67, 67)
 
@@ -324,6 +326,6 @@ def init_pygame():
     pygame.display.set_caption("Asteroids")
 
 
-def restart_game():
-    asteroids = Asteroids()
+def restart_game(asteroids):
+    asteroids.__init__()
     asteroids.game_state = GameState.GAME
