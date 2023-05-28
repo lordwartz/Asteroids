@@ -90,7 +90,7 @@ class Asteroids:
         self.__process_ufo_logic()
         self.__check_ufo_collision()
         self.__check_asteroids_collision()
-        self._check_spaceship_collision()
+        self.__check_spaceship_collision()
         self.__check_game_state()
 
     def __draw(self):
@@ -136,7 +136,7 @@ class Asteroids:
 
         return game_objects
 
-    def _check_spaceship_collision(self):
+    def __check_spaceship_collision(self):
         for asteroid in self.asteroids[:]:
             if self.spaceship and asteroid.collides_with(self.spaceship):
                 self.spaceship.position = self.standard_spaceship_position
