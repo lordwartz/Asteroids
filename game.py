@@ -1,5 +1,7 @@
 import random
 import pygame
+import pygame_widgets
+from pygame_widgets.textbox import TextBox
 from pygame import Color, Vector2
 from utils import get_random_position, print_text, load_sprite, get_random_size
 from models import Asteroid, Spaceship, Ufo
@@ -12,7 +14,9 @@ class GameState(Enum):
     PAUSE = 2
     WIN_MENU = 3,
     LOSE_MENU = 4,
-    QUIT = 5
+    QUIT = 5,
+    ENTER_NAME = 6,
+    LEADERBOARD = 7
 
 
 class Asteroids:
@@ -26,7 +30,8 @@ class Asteroids:
         self.clock = pygame.time.Clock()
         self.current_frame = 0
         self.font = pygame.font.Font(None, 64)
-        self.win_message = ""
+        self.nickname = ""
+        self.leaderboard = {}
 
         self.game_state = GameState.MAIN_MENU
         self.asteroids = []
@@ -41,12 +46,17 @@ class Asteroids:
                                    self.bullets.append)
 
         self.__generate_asteroids()
+        self.__fill_leaderboard()
 
     def start_game(self):
         while self.game_state is not GameState.QUIT:
             match self.game_state:
                 case GameState.MAIN_MENU:
                     self.__show_main_menu()
+                case GameState.ENTER_NAME:
+                    self.__show_input_field()
+                case GameState.LEADERBOARD:
+                    self.__show_leaderboard()
                 case GameState.GAME:
                     self.__handle_input()
                     self.__process_game_logic()
@@ -54,8 +64,10 @@ class Asteroids:
                 case GameState.PAUSE:
                     self.__pause_game()
                 case GameState.WIN_MENU:
+                    self.__record_score()
                     self.__show_win_menu()
                 case GameState.LOSE_MENU:
+                    self.__record_score()
                     self.__show_lose_menu()
         else:
             quit()
@@ -105,13 +117,12 @@ class Asteroids:
             print_text(self.screen, f'Score: {self.spaceship.score}',
                        pygame.font.Font(None, 32),
                        Vector2(self.screen.get_size()[0] // 2, 20))
+            print_text(self.screen, self.nickname, pygame.font.Font(None, 32),
+                       Vector2(self.screen.get_size()[0] // 2, 50),
+                       Color("white"))
 
         for game_object in self.__get_game_objects():
             game_object.draw(self.screen)
-
-        if self.win_message:
-            print_text(self.screen, self.win_message, self.font,
-                       Vector2(self.screen.get_size()) / 2)
 
         pygame.display.flip()
         self.clock.tick(self.FRAMERATE)
@@ -200,6 +211,7 @@ class Asteroids:
 
     def __check_death(self):
         if self.spaceship.lives == 0:
+            self.leaderboard[self.nickname] = self.spaceship.score
             self.spaceship = None
 
     def __pause_game(self):
@@ -213,13 +225,14 @@ class Asteroids:
                     self.game_state = GameState.QUIT
                     return
                 elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_ESCAPE:
-                            pygame.display.set_caption("Asteroids")
-                            self.game_state = GameState.GAME
-                            break
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.display.set_caption("Asteroids")
+                        self.game_state = GameState.GAME
+                        break
 
     def __show_main_menu(self):
         pygame.display.set_caption("Menu")
+        self.screen.fill(Color("black"))
         print_text(self.screen, "THE ASTEROIDS", self.font,
                    Vector2(self.screen.get_size()) / 2)
         pygame.display.flip()
@@ -231,12 +244,69 @@ class Asteroids:
                 elif event.type == pygame.KEYDOWN:
                     match event.key:
                         case pygame.K_RETURN:
-                            self.game_state = GameState.GAME
+                            self.game_state = GameState.ENTER_NAME
                             pygame.display.set_caption("Asteroids")
                             break
                         case pygame.K_ESCAPE:
                             self.game_state = GameState.QUIT
                             return
+                        case pygame.K_TAB:
+                            self.game_state = GameState.LEADERBOARD
+                            return
+
+    def __show_input_field(self):
+        pygame.display.set_caption("Enter your name")
+
+        while self.game_state is GameState.ENTER_NAME:
+            events = pygame.event.get()
+            for event in events:
+                if event.type == pygame.QUIT:
+                    self.game_state = GameState.QUIT
+                    return
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_BACKSPACE:
+                        self.nickname = self.nickname[:-1]
+                    elif event.key == pygame.K_RETURN:
+                        self.game_state = GameState.GAME
+                        return
+                    else:
+                        self.nickname += event.unicode
+
+            self.screen.fill(Color("black"))
+            print_text(self.screen, "Enter your name", self.font,
+                       (self.screen.get_size()[0] // 2, 250), Color("white"))
+            pygame.draw.rect(self.screen, (156, 156, 156),
+                             (350, 350, 800, 80))
+            print_text(self.screen, self.nickname, self.font, (750, 390),
+                       Color("white"))
+            pygame.display.flip()
+
+    def __show_leaderboard(self):
+        pygame.display.set_caption("Leaderboard")
+        self.screen.fill(Color("black"))
+        print_text(self.screen, "Leaderboard", pygame.font.Font(None, 90),
+                   (self.screen.get_size()[0] // 2, 100), Color("white"))
+
+        offset = 100
+        for player, score in self.leaderboard.items():
+            print_text(self.screen, f"{player}: {score}", self.font,
+                       Vector2(self.screen.get_size()[0] // 2, 100 + offset),
+                       Color("white"))
+            offset += 60
+
+        pygame.display.flip()
+
+        while self.game_state is GameState.LEADERBOARD:
+            events = pygame.event.get()
+            for event in events:
+                if event.type == pygame.QUIT:
+                    self.game_state = GameState.QUIT
+                    return
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.game_state = GameState.MAIN_MENU
+                        return
+
 
     def __show_win_menu(self):
         surface = self.screen
@@ -301,7 +371,7 @@ class Asteroids:
                 else:
                     color_rectangle = (67, 67, 67)
 
-            surface.fill(Color("black"))
+            surface.fill((0, 0, 0))
             pygame.draw.rect(surface, color_rectangle,
                              (button_x, button_y, button_width, button_height))
             print_text(surface, "YOU LOSE", pygame.font.Font(None, 100),
@@ -311,6 +381,24 @@ class Asteroids:
                        Vector2(button_x + button_width // 2,
                                button_y + button_height // 2), Color("white"))
             pygame.display.flip()
+
+    def __record_score(self):
+        if self.spaceship:
+            self.leaderboard[self.nickname] = self.spaceship.score
+        self.leaderboard = dict(sorted(self.leaderboard.items(),
+                                       key=lambda item: item[1], reverse=True))
+        with open("record_table.txt", "w") as record_table:
+            for player, score in self.leaderboard.items():
+                record_table.write(f"{player}: {score} \n")
+
+    def __fill_leaderboard(self):
+        with open("record_table.txt", "r") as record_table:
+            for string in record_table:
+                if string == "" or string == "\n":
+                    return
+                player = string.split(":")[0]
+                score = int(string.split(":")[1][1:])
+                self.leaderboard[player] = score
 
     def __check_game_state(self):
         if not self.spaceship:
