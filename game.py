@@ -158,7 +158,6 @@ class Asteroids:
                 self.spaceship.lives -= 1
                 self.__check_death()
                 self.bullets_ufo.remove(bullet)
-                break
 
     def __process_bullets_logic(self):
         for bullet in self.bullets[:]:
@@ -210,8 +209,11 @@ class Asteroids:
             game_object.move(self.screen)
 
     def __check_death(self):
-        if self.spaceship.lives == 0:
+        if self.nickname not in self.leaderboard:
             self.leaderboard[self.nickname] = self.spaceship.score
+        if self.spaceship.score > self.leaderboard[self.nickname]:
+            self.leaderboard[self.nickname] = self.spaceship.score
+        if self.spaceship.lives == 0:
             self.spaceship = None
 
     def __pause_game(self):
@@ -307,7 +309,6 @@ class Asteroids:
                         self.game_state = GameState.MAIN_MENU
                         return
 
-
     def __show_win_menu(self):
         surface = self.screen
         surface.fill((0, 0, 0))
@@ -383,7 +384,10 @@ class Asteroids:
             pygame.display.flip()
 
     def __record_score(self):
-        if self.spaceship:
+        if self.spaceship and self.nickname not in self.leaderboard:
+            self.leaderboard[self.nickname] = self.spaceship.score
+        if self.game_state is GameState.WIN_MENU \
+                and self.spaceship.score > self.leaderboard[self.nickname]:
             self.leaderboard[self.nickname] = self.spaceship.score
         self.leaderboard = dict(sorted(self.leaderboard.items(),
                                        key=lambda item: item[1], reverse=True))
@@ -394,7 +398,7 @@ class Asteroids:
     def __fill_leaderboard(self):
         with open("record_table.txt", "r") as record_table:
             for string in record_table:
-                if string == "" or string == "\n":
+                if not string.strip():
                     return
                 player = string.split(":")[0]
                 score = int(string.split(":")[1][1:])
