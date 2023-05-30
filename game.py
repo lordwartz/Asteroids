@@ -245,6 +245,7 @@ class Asteroids:
         while self.game_state is GameState.MAIN_MENU:
             self.__draw_label("THE ASTEROIDS", "white")
             self.__draw_buttons(menu_buttons)
+            pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.game_state = GameState.QUIT
@@ -286,11 +287,11 @@ class Asteroids:
         while self.game_state is GameState.WIN_MENU:
             self.__draw_label("YOU WIN", "green")
             self.__draw_buttons(win_buttons)
+            pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.game_state = GameState.QUIT
                     return
-            pygame.display.flip()
 
     def __show_lose_menu(self):
         pygame.display.set_caption("LOSE")
@@ -316,14 +317,13 @@ class Asteroids:
                                restart_game(self, True))
                         ]
         while self.game_state is GameState.LOSE_MENU:
-            pygame.display.flip()
             self.__draw_label("YOU LOSE", "red")
             self.__draw_buttons(lose_buttons)
+            pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.game_state = GameState.QUIT
                     return
-            pygame.display.flip()
 
     def __check_game_state(self):
         if not self.spaceship:
