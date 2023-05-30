@@ -81,12 +81,12 @@ class Asteroids:
                 if event.key == pygame.K_ESCAPE:
                     self.game_state = GameState.PAUSE
                     return
-                elif self.spaceship and event.key == pygame.K_SPACE:
+                elif self.spaceship.is_alive and event.key == pygame.K_SPACE:
                     self.spaceship.shoot()
 
         is_key_pressed = pygame.key.get_pressed()
 
-        if self.spaceship:
+        if self.spaceship.is_alive:
             if is_key_pressed[pygame.K_RIGHT]:
                 self.spaceship.rotate(clockwise=True)
             elif is_key_pressed[pygame.K_LEFT]:
@@ -108,7 +108,7 @@ class Asteroids:
     def __draw(self):
         self.screen.fill((0, 0, 0))
 
-        if self.spaceship:
+        if self.spaceship.is_alive:
             heart_image = load_sprite("heart")
             heart_rect = heart_image.get_rect()
             for i in range(self.spaceship.lives):
@@ -142,19 +142,19 @@ class Asteroids:
     def __get_game_objects(self):
         game_objects = [*self.asteroids, *self.bullets, *self.ufo,
                         *self.bullets_ufo]
-        if self.spaceship:
+        if self.spaceship.is_alive:
             game_objects.append(self.spaceship)
 
         return game_objects
 
     def _check_spaceship_collision(self):
         for asteroid in self.asteroids[:]:
-            if self.spaceship and asteroid.collides_with(self.spaceship):
+            if self.spaceship.is_alive and asteroid.collides_with(self.spaceship):
                 self.spaceship.position = self.standard_spaceship_position
                 self.spaceship.lives -= 1
                 self.__check_death()
         for bullet in self.bullets_ufo[:]:
-            if self.spaceship and bullet.collides_with(self.spaceship):
+            if self.spaceship.is_alive and bullet.collides_with(self.spaceship):
                 self.spaceship.lives -= 1
                 self.__check_death()
                 self.bullets_ufo.remove(bullet)
@@ -214,7 +214,7 @@ class Asteroids:
         if self.spaceship.score > self.leaderboard[self.nickname]:
             self.leaderboard[self.nickname] = self.spaceship.score
         if self.spaceship.lives == 0:
-            self.spaceship = None
+            self.spaceship.is_alive = False
 
     def __pause_game(self):
         pygame.display.set_caption("Paused")
@@ -384,7 +384,7 @@ class Asteroids:
             pygame.display.flip()
 
     def __record_score(self):
-        if self.spaceship and self.nickname not in self.leaderboard:
+        if self.spaceship.is_alive and self.nickname not in self.leaderboard:
             self.leaderboard[self.nickname] = self.spaceship.score
         if self.game_state is GameState.WIN_MENU \
                 and self.spaceship.score > self.leaderboard[self.nickname]:
@@ -405,7 +405,7 @@ class Asteroids:
                 self.leaderboard[player] = score
 
     def __check_game_state(self):
-        if not self.spaceship:
+        if not self.spaceship.is_alive:
             self.game_state = GameState.LOSE_MENU
         elif not self.asteroids:
             self.game_state = GameState.WIN_MENU

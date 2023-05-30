@@ -38,6 +38,7 @@ class Spaceship(GameObject):
         self.score = 0
         self.lives = 3
         self.create_bullet_callback = create_bullet_callback
+        self.is_alive = True
 
         self.direction = Vector2(0, -1)
         super().__init__(position, load_sprite("spaceship"), Vector2(0))
