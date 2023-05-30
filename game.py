@@ -209,7 +209,8 @@ class Asteroids:
         print_text(self.screen, text, self.font,
                    self.default_text_pos, color=color)
 
-    def __draw_buttons(self, lose_buttons):
+    @staticmethod
+    def __draw_buttons(lose_buttons):
         Mouse.updateMouseState()
         for button in lose_buttons:
             button.listen(pygame.event.get())
