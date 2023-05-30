@@ -209,10 +209,6 @@ class Asteroids:
             game_object.move(self.screen)
 
     def __check_death(self):
-        if self.nickname not in self.leaderboard:
-            self.leaderboard[self.nickname] = self.spaceship.score
-        if self.spaceship.score > self.leaderboard[self.nickname]:
-            self.leaderboard[self.nickname] = self.spaceship.score
         if self.spaceship.lives == 0:
             self.spaceship.is_alive = False
 
@@ -384,10 +380,9 @@ class Asteroids:
             pygame.display.flip()
 
     def __record_score(self):
-        if self.spaceship.is_alive and self.nickname not in self.leaderboard:
+        if self.nickname not in self.leaderboard:
             self.leaderboard[self.nickname] = self.spaceship.score
-        if self.game_state is GameState.WIN_MENU \
-                and self.spaceship.score > self.leaderboard[self.nickname]:
+        if self.spaceship.score > self.leaderboard[self.nickname]:
             self.leaderboard[self.nickname] = self.spaceship.score
         self.leaderboard = dict(sorted(self.leaderboard.items(),
                                        key=lambda item: item[1], reverse=True))
