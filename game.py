@@ -205,30 +205,15 @@ class Asteroids:
         if self.spaceship.lives == 0:
             self.spaceship = None
 
-    def __pause_game(self):
-        pygame.display.set_caption("Paused")
-        buttons = [Button(self.screen,
-                          *(self.default_button_pos -
-                            self.default_button_size // 2),
-                          *self.default_button_size,
-                          text='MAIN MENU', fontSize=40,
-                          inactiveColour=(155, 155, 155),
-                          pressedColour=(200, 200, 200), radius=20,
-                          onClick=lambda:
-                          self.__change_game_state(GameState.MAIN_MENU))]
-        while self.game_state is GameState.PAUSE:
-            self.__draw_label("PAUSED", "red")
-            self.__draw_buttons(buttons)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.game_state = GameState.QUIT
-                    return
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        pygame.display.set_caption("Asteroids")
-                        self.game_state = GameState.GAME
-                        break
-            pygame.display.flip()
+    def __draw_label(self, text, color):
+        print_text(self.screen, text, self.font,
+                   self.default_text_pos, color=color)
+
+    def __draw_buttons(self, lose_buttons):
+        Mouse.updateMouseState()
+        for button in lose_buttons:
+            button.listen(pygame.event.get())
+            button.draw()
 
     def __show_main_menu(self):
         pygame.display.set_caption("Menu")
@@ -249,17 +234,31 @@ class Asteroids:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.game_state = GameState.QUIT
+
+    def __pause_game(self):
+        pygame.display.set_caption("Paused")
+        buttons = [Button(self.screen,
+                          *(self.default_button_pos -
+                            self.default_button_size // 2),
+                          *self.default_button_size,
+                          text='MAIN MENU', fontSize=40,
+                          inactiveColour=(155, 155, 155),
+                          pressedColour=(200, 200, 200), radius=20,
+                          onClick=lambda:
+                          self.__change_game_state(GameState.MAIN_MENU))]
+        while self.game_state is GameState.PAUSE:
+            self.__draw_label("PAUSED", "red")
+            self.__draw_buttons(buttons)
             pygame.display.flip()
-
-    def __draw_label(self, text, color):
-        print_text(self.screen, text, self.font,
-                   self.default_text_pos, color=color)
-
-    def __draw_buttons(self, lose_buttons):
-        Mouse.updateMouseState()
-        for button in lose_buttons:
-            button.listen(pygame.event.get())
-            button.draw()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.game_state = GameState.QUIT
+                    return
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.display.set_caption("Asteroids")
+                        self.game_state = GameState.GAME
+                        break
 
     def __show_win_menu(self):
         pygame.display.set_caption("WIN")
