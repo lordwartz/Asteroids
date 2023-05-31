@@ -90,11 +90,9 @@ class Asteroids:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.game_state = GameState.QUIT
-                return
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.game_state = GameState.PAUSE
-                    return
                 elif self.spaceship.is_alive and event.key == pygame.K_SPACE:
                     self.spaceship.shoot()
 
