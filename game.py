@@ -263,7 +263,18 @@ class Asteroids:
                                inactiveColour=(255, 0, 0),
                                radius=20,
                                onClick=lambda:
-                               self.__change_game_state(GameState.ENTER_NAME))]
+                               self.__change_game_state(GameState.ENTER_NAME)),
+                        Button(self.screen,
+                               *(self.default_button_pos
+                                 + self.default_delay
+                                 - self.default_button_size // 2),
+                               *self.default_button_size,
+                               text='LEADERBOARD', fontSize=40,
+                               inactiveColour=(255, 0, 0),
+                               radius=20,
+                               onClick=lambda:
+                               self.__change_game_state(
+                                   GameState.LEADERBOARD))]
         while self.game_state is GameState.MAIN_MENU:
             self.__draw_label("THE ASTEROIDS", "white")
             self.__draw_buttons(menu_buttons)
@@ -354,6 +365,16 @@ class Asteroids:
     def __show_leaderboard(self):
         pygame.display.set_caption("Leaderboard")
         self.screen.fill(Color("black"))
+        menu_buttons = [Button(self.screen,
+                               *(self.default_button_pos
+                                 + self.default_delay * 4
+                                 - self.default_button_size // 2),
+                               *self.default_button_size,
+                               text='TO MENU', fontSize=40,
+                               inactiveColour=(255, 0, 0),
+                               radius=20,
+                               onClick=lambda:
+                               self.__change_game_state(GameState.MAIN_MENU))]
         print_text(self.screen, "Leaderboard", pygame.font.Font(None, 90),
                    (self.screen.get_size()[0] // 2, self.default_delay[1]),
                    Color("RED"))
@@ -369,8 +390,9 @@ class Asteroids:
         pygame.display.flip()
 
         while self.game_state is GameState.LEADERBOARD:
-            events = pygame.event.get()
-            for event in events:
+            self.__draw_buttons(menu_buttons)
+            pygame.display.flip()
+            for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.game_state = GameState.QUIT
                     return
