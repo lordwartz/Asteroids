@@ -2,8 +2,6 @@ import random
 import pygame
 from pygame_widgets import Mouse
 from pygame_widgets.button import Button
-import pygame_widgets
-from pygame_widgets.textbox import TextBox
 from pygame import Color, Vector2
 from utils import get_random_position, print_text, load_sprite, get_random_size
 from models import Asteroid, Spaceship, Ufo, Bullet
@@ -47,7 +45,7 @@ class Asteroids:
         self.nickname = "Default"
         self.is_default_nickname = True
         self.leaderboard = {}
-        self.level = 4
+        self.level = 1
         self.ufo_quantity = 0
 
         self.game_state = GameState.MAIN_MENU
@@ -512,7 +510,8 @@ class Asteroids:
         elif not self.asteroids and not self.ufo and self.level < 4:
             self.spaceship.position = self.standard_spaceship_position
             self.spaceship.direction = Vector2(0, -1)
-            self.bullets = []
+            for bullet in self.bullets[:]:
+                self.bullets.remove(bullet)
             self.bullets_ufo = []
             self.level += 1
             self.__generate_enemies()
