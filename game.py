@@ -111,7 +111,7 @@ class Asteroids:
     def __process_game_logic(self):
         self.__move_objects()
         self.__process_bullets_logic()
-        if not self.ufo_quantity == 0:
+        if self.ufo_quantity > 0:
             self.__generate_ufo()
         self.__process_ufo_logic()
         self.__check_bullets_collision()
@@ -238,7 +238,7 @@ class Asteroids:
                      (-1, 0): (self.screen.get_width() - 1, random_y),
                      (0, -1): (random_x, self.screen.get_height() - 1)}
         if (self.current_frame % (random.randrange(8, 12)
-                                  * self.FRAMERATE)) == self.FRAMERATE * 4:
+                                  * self.FRAMERATE)) == self.FRAMERATE * 3:
             direction = directions[random.randrange(4)]
             position = ufo_spawn[direction]
             self.ufo.append(Ufo(position, direction, self.bullets_ufo.append))
