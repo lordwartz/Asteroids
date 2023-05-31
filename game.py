@@ -122,6 +122,7 @@ class Asteroids:
 
     def __draw(self):
         self.screen.fill(Color("black"))
+        pygame.display.set_caption("Asteroids")
         if self.spaceship.is_alive:
             heart_image = load_sprite("heart")
             heart_rect = heart_image.get_rect()
