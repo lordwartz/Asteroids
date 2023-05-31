@@ -453,10 +453,14 @@ class Asteroids:
             self.game_state = GameState.WIN_MENU
 
     def __change_game_state(self, game_state):
-        if game_state is GameState.MAIN_MENU:
-            restart_game(self, True)
-        else:
-            self.game_state = game_state
+        match game_state:
+            case GameState.MAIN_MENU:
+                restart_game(self, True)
+            case GameState.GAME:
+                if len(self.nickname) > 0:
+                    self.game_state = GameState.GAME
+            case _:
+                self.game_state = game_state
 
 
 def init_pygame():
