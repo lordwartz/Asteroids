@@ -253,7 +253,7 @@ class Asteroids:
                                *self.default_button_size,
                                text='PLAY', fontSize=40,
                                inactiveColour=(255, 0, 0),
-                               pressedColour=(0, 255, 0), radius=20,
+                               radius=20,
                                onClick=lambda:
                                self.__change_game_state(GameState.ENTER_NAME))]
         while self.game_state is GameState.MAIN_MENU:
@@ -276,7 +276,7 @@ class Asteroids:
                           *self.default_button_size,
                           text='MAIN MENU', fontSize=40,
                           inactiveColour=(155, 155, 155),
-                          pressedColour=(200, 200, 200), radius=20,
+                          radius=20,
                           onClick=lambda:
                           self.__change_game_state(GameState.MAIN_MENU))]
         while self.game_state is GameState.PAUSE:
@@ -302,7 +302,7 @@ class Asteroids:
                           *self.default_button_size,
                           text='START', fontSize=40,
                           inactiveColour=(255, 0, 0),
-                          pressedColour=(0, 255, 0), radius=20,
+                          radius=20,
                           onClick=lambda:
                           self.__change_game_state(GameState.GAME)),
                    Button(self.screen,
@@ -312,7 +312,6 @@ class Asteroids:
                           *self.default_button_size,
                           text='TO MENU', fontSize=40,
                           inactiveColour=(255, 0, 0),
-                          pressedColour=(0, 255, 0),
                           radius=20,
                           onClick=lambda:
                           restart_game(self, True))
@@ -374,7 +373,7 @@ class Asteroids:
                               *self.default_button_size,
                               text='RESTART', fontSize=40,
                               inactiveColour=(255, 0, 0),
-                              pressedColour=(0, 255, 0), radius=20,
+                              radius=20,
                               onClick=lambda: restart_game(self, False)),
                        Button(self.screen,
                               *(self.default_button_pos
@@ -383,7 +382,6 @@ class Asteroids:
                               *self.default_button_size,
                               text='TO MENU', fontSize=40,
                               inactiveColour=(255, 0, 0),
-                              pressedColour=(0, 255, 0),
                               radius=20,
                               onClick=lambda:
                               restart_game(self, True))
@@ -406,7 +404,7 @@ class Asteroids:
                                *self.default_button_size,
                                text='RESTART', fontSize=40,
                                inactiveColour=(255, 0, 0),
-                               pressedColour=(0, 255, 0), radius=20,
+                               radius=20,
                                onClick=lambda: restart_game(self, False)),
                         Button(self.screen,
                                *(self.default_button_pos
@@ -415,7 +413,6 @@ class Asteroids:
                                *self.default_button_size,
                                text='TO MENU', fontSize=40,
                                inactiveColour=(255, 0, 0),
-                               pressedColour=(0, 255, 0),
                                radius=20,
                                onClick=lambda:
                                restart_game(self, True))
