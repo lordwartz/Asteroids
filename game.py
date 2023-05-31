@@ -1,9 +1,9 @@
 import random
 import pygame
-from pygame_widgets import Mouse
 from pygame_widgets.button import Button
 from pygame import Color, Vector2
-from utils import get_random_position, print_text, load_sprite, get_random_size
+from utils import get_random_position, print_text, load_sprite, \
+    get_random_size, draw_buttons
 from models import Asteroid, Spaceship, Ufo, Bullet
 from enum import Enum
 
@@ -264,13 +264,6 @@ class Asteroids:
         print_text(self.screen, text, self.font,
                    self.default_text_pos, color=color)
 
-    @staticmethod
-    def __draw_buttons(lose_buttons):
-        Mouse.updateMouseState()
-        for button in lose_buttons:
-            button.listen(pygame.event.get())
-            button.draw()
-
     def __show_main_menu(self):
         pygame.display.set_caption("Menu")
         self.screen.fill(Color("black"))
@@ -296,7 +289,7 @@ class Asteroids:
                                    GameState.LEADERBOARD))]
         while self.game_state is GameState.MAIN_MENU:
             self.__draw_label("THE ASTEROIDS", "white")
-            self.__draw_buttons(menu_buttons)
+            draw_buttons(menu_buttons)
             pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -319,7 +312,7 @@ class Asteroids:
                           self.__change_game_state(GameState.MAIN_MENU))]
         while self.game_state is GameState.PAUSE:
             self.__draw_label("PAUSED", "red")
-            self.__draw_buttons(buttons)
+            draw_buttons(buttons)
             pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -355,7 +348,7 @@ class Asteroids:
                           restart_game(self, True))
                    ]
         while self.game_state is GameState.ENTER_NAME:
-            self.__draw_buttons(buttons)
+            draw_buttons(buttons)
             pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -409,7 +402,7 @@ class Asteroids:
         pygame.display.flip()
 
         while self.game_state is GameState.LEADERBOARD:
-            self.__draw_buttons(menu_buttons)
+            draw_buttons(menu_buttons)
             pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -444,7 +437,7 @@ class Asteroids:
                        ]
         while self.game_state is GameState.WIN_MENU:
             self.__draw_label("YOU WIN", "green")
-            self.__draw_buttons(win_buttons)
+            draw_buttons(win_buttons)
             pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -475,7 +468,7 @@ class Asteroids:
                         ]
         while self.game_state is GameState.LOSE_MENU:
             self.__draw_label("YOU LOSE", "red")
-            self.__draw_buttons(lose_buttons)
+            draw_buttons(lose_buttons)
             pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -510,8 +503,7 @@ class Asteroids:
         elif not self.asteroids and not self.ufo and self.level < 4:
             self.spaceship.position = self.standard_spaceship_position
             self.spaceship.direction = Vector2(0, -1)
-            for bullet in self.bullets[:]:
-                self.bullets.remove(bullet)
+            self.bullets.clear()
             self.bullets_ufo = []
             self.level += 1
             self.__generate_enemies()

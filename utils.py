@@ -1,8 +1,9 @@
 import random
 
-from pygame import Color
+from pygame import Color, event
 from pygame.image import load
 from pygame.math import Vector2
+from pygame_widgets import Mouse
 
 
 def load_sprite(name, with_alpha=True):
@@ -46,3 +47,16 @@ def print_text(surface, text, font, rect_center, color=Color("red")):
     rect.center = rect_center
 
     surface.blit(text_surface, rect)
+
+
+def draw_label(self, text, color):
+    print_text(self.screen, text, self.font,
+               self.default_text_pos, color=color)
+
+
+@staticmethod
+def draw_buttons(lose_buttons):
+    Mouse.updateMouseState()
+    for button in lose_buttons:
+        button.listen(event.get())
+        button.draw()
