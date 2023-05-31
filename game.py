@@ -469,5 +469,10 @@ def init_pygame():
 
 
 def restart_game(asteroids, to_menu):
+    nickname = asteroids.nickname
     asteroids.__init__()
-    asteroids.game_state = GameState.MAIN_MENU if to_menu else GameState.GAME
+    if not to_menu:
+        asteroids.nickname = nickname
+        asteroids.game_state = GameState.GAME
+    else:
+        asteroids.game_state = GameState.MAIN_MENU
