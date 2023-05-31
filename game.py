@@ -2,9 +2,11 @@ import random
 import pygame
 from pygame_widgets import Mouse
 from pygame_widgets.button import Button
+import pygame_widgets
+from pygame_widgets.textbox import TextBox
 from pygame import Color, Vector2
 from utils import get_random_position, print_text, load_sprite, get_random_size
-from models import Asteroid, Spaceship, Ufo
+from models import Asteroid, Spaceship, Ufo, Bullet
 from enum import Enum
 
 
@@ -14,7 +16,9 @@ class GameState(Enum):
     PAUSE = 2
     WIN_MENU = 3,
     LOSE_MENU = 4,
-    QUIT = 5
+    QUIT = 5,
+    ENTER_NAME = 6,
+    LEADERBOARD = 7
 
 
 class Asteroids:
@@ -34,7 +38,8 @@ class Asteroids:
         self.clock = pygame.time.Clock()
         self.current_frame = 0
         self.font = pygame.font.Font(None, 64)
-        self.win_message = ""
+        self.nickname = ""
+        self.leaderboard = {}
 
         self.game_state = GameState.MAIN_MENU
         self.asteroids = []
@@ -48,12 +53,17 @@ class Asteroids:
         self.spaceship = Spaceship(self.standard_spaceship_position,
                                    self.bullets.append)
         self.__generate_asteroids()
+        self.__fill_leaderboard()
 
     def start_game(self):
         while self.game_state is not GameState.QUIT:
             match self.game_state:
                 case GameState.MAIN_MENU:
                     self.__show_main_menu()
+                case GameState.ENTER_NAME:
+                    self.__show_input_field()
+                case GameState.LEADERBOARD:
+                    self.__show_leaderboard()
                 case GameState.GAME:
                     self.__handle_input()
                     self.__process_game_logic()
@@ -61,8 +71,10 @@ class Asteroids:
                 case GameState.PAUSE:
                     self.__pause_game()
                 case GameState.WIN_MENU:
+                    self.__record_score()
                     self.__show_win_menu()
                 case GameState.LOSE_MENU:
+                    self.__record_score()
                     self.__show_lose_menu()
         else:
             quit()
@@ -76,12 +88,12 @@ class Asteroids:
                 if event.key == pygame.K_ESCAPE:
                     self.game_state = GameState.PAUSE
                     return
-                elif self.spaceship and event.key == pygame.K_SPACE:
+                elif self.spaceship.is_alive and event.key == pygame.K_SPACE:
                     self.spaceship.shoot()
 
         is_key_pressed = pygame.key.get_pressed()
 
-        if self.spaceship:
+        if self.spaceship.is_alive:
             if is_key_pressed[pygame.K_RIGHT]:
                 self.spaceship.rotate(clockwise=True)
             elif is_key_pressed[pygame.K_LEFT]:
@@ -102,9 +114,8 @@ class Asteroids:
         self.__check_game_state()
 
     def __draw(self):
-        self.screen.fill((0, 0, 0))
-
-        if self.spaceship:
+        self.screen.fill(Color("black"))
+        if self.spaceship.is_alive:
             heart_image = load_sprite("heart")
             heart_rect = heart_image.get_rect()
             for i in range(self.spaceship.lives):
@@ -113,6 +124,9 @@ class Asteroids:
             print_text(self.screen, f'Score: {self.spaceship.score}',
                        pygame.font.Font(None, 32),
                        Vector2(self.screen.get_size()[0] // 2, 20))
+            print_text(self.screen, self.nickname, pygame.font.Font(None, 32),
+                       Vector2(self.screen.get_size()[0] // 2, 50),
+                       Color("white"))
 
         for game_object in self.__get_game_objects():
             game_object.draw(self.screen)
@@ -135,22 +149,26 @@ class Asteroids:
     def __get_game_objects(self):
         game_objects = [*self.asteroids, *self.bullets, *self.ufo,
                         *self.bullets_ufo]
-        if self.spaceship:
+        if self.spaceship.is_alive:
             game_objects.append(self.spaceship)
 
         return game_objects
 
     def __check_spaceship_collision(self):
         for asteroid in self.asteroids[:]:
-            self.__spaceship_wrecked_logic(asteroid)
+            self.__spaceship_wrecked_logic(asteroid, True)
         for bullet in self.bullets_ufo[:]:
-            self.__spaceship_wrecked_logic(bullet)
+            self.__spaceship_wrecked_logic(bullet, False)
         for ufo in self.ufo[:]:
-            self.__spaceship_wrecked_logic(ufo)
+            self.__spaceship_wrecked_logic(ufo, True)
 
-    def __spaceship_wrecked_logic(self, collision_object):
-        if self.spaceship and collision_object.collides_with(self.spaceship):
-            self.spaceship.position = self.standard_spaceship_position
+    def __spaceship_wrecked_logic(self, collision_object, teleport):
+        if self.spaceship.is_alive \
+                and collision_object.collides_with(self.spaceship):
+            if teleport:
+                self.spaceship.position = self.standard_spaceship_position
+            if type(collision_object) is Bullet:
+                self.bullets_ufo.remove(collision_object)
             self.spaceship.lives -= 1
             self.__check_death()
 
@@ -213,7 +231,7 @@ class Asteroids:
 
     def __check_death(self):
         if self.spaceship.lives == 0:
-            self.spaceship = None
+            self.spaceship.is_alive = False
 
     def __draw_label(self, text, color):
         print_text(self.screen, text, self.font,
@@ -228,7 +246,7 @@ class Asteroids:
 
     def __show_main_menu(self):
         pygame.display.set_caption("Menu")
-        self.screen.fill((0, 0, 0))
+        self.screen.fill(Color("black"))
         menu_buttons = [Button(self.screen,
                                *(self.default_button_pos
                                  - self.default_button_size // 2),
@@ -237,7 +255,7 @@ class Asteroids:
                                inactiveColour=(255, 0, 0),
                                pressedColour=(0, 255, 0), radius=20,
                                onClick=lambda:
-                               self.__change_game_state(GameState.GAME))]
+                               self.__change_game_state(GameState.ENTER_NAME))]
         while self.game_state is GameState.MAIN_MENU:
             self.__draw_label("THE ASTEROIDS", "white")
             self.__draw_buttons(menu_buttons)
@@ -245,6 +263,10 @@ class Asteroids:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.game_state = GameState.QUIT
+                elif event.type == pygame.KEYDOWN:
+                    match event.key:
+                        case pygame.K_TAB:
+                            self.game_state = GameState.LEADERBOARD
 
     def __pause_game(self):
         pygame.display.set_caption("Paused")
@@ -271,9 +293,81 @@ class Asteroids:
                         self.game_state = GameState.GAME
                         break
 
+    def __show_input_field(self):
+        pygame.display.set_caption("Enter your name")
+        self.screen.fill(Color("black"))
+        buttons = [Button(self.screen,
+                          *(self.default_button_pos -
+                            self.default_button_size // 2),
+                          *self.default_button_size,
+                          text='START', fontSize=40,
+                          inactiveColour=(255, 0, 0),
+                          pressedColour=(0, 255, 0), radius=20,
+                          onClick=lambda:
+                          self.__change_game_state(GameState.GAME)),
+                   Button(self.screen,
+                          *(self.default_button_pos
+                            - self.default_button_size // 2
+                            + self.default_button_delay),
+                          *self.default_button_size,
+                          text='TO MENU', fontSize=40,
+                          inactiveColour=(255, 0, 0),
+                          pressedColour=(0, 255, 0),
+                          radius=20,
+                          onClick=lambda:
+                          restart_game(self, True))
+                   ]
+        while self.game_state is GameState.ENTER_NAME:
+            self.__draw_buttons(buttons)
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.game_state = GameState.QUIT
+                    return
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_BACKSPACE:
+                        self.nickname = self.nickname[:-1]
+                    elif event.key == pygame.K_RETURN:
+                        self.game_state = GameState.GAME
+                        return
+                    elif len(self.nickname) <= 20:
+                        self.nickname += event.unicode
+            print_text(self.screen, "Enter your name", self.font,
+                       (self.screen.get_size()[0] // 2, 250), Color("white"))
+            pygame.draw.rect(self.screen, (156, 156, 156),
+                             (350, 320, 800, 80))
+            print_text(self.screen, self.nickname, self.font, (750, 360),
+                       Color("white"))
+
+    def __show_leaderboard(self):
+        pygame.display.set_caption("Leaderboard")
+        self.screen.fill(Color("black"))
+        print_text(self.screen, "Leaderboard", pygame.font.Font(None, 90),
+                   (self.screen.get_size()[0] // 2, 100), Color("white"))
+
+        offset = 100
+        for player, score in self.leaderboard.items():
+            print_text(self.screen, f"{player}: {score}", self.font,
+                       Vector2(self.screen.get_size()[0] // 2, 100 + offset),
+                       Color("white"))
+            offset += 60
+
+        pygame.display.flip()
+
+        while self.game_state is GameState.LEADERBOARD:
+            events = pygame.event.get()
+            for event in events:
+                if event.type == pygame.QUIT:
+                    self.game_state = GameState.QUIT
+                    return
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_TAB:
+                        self.game_state = GameState.MAIN_MENU
+                        return
+
     def __show_win_menu(self):
         pygame.display.set_caption("WIN")
-        self.screen.fill((0, 0, 0))
+        self.screen.fill(Color("black"))
         win_buttons = [Button(self.screen,
                               *(self.default_button_pos -
                                 self.default_button_size // 2),
@@ -305,7 +399,7 @@ class Asteroids:
 
     def __show_lose_menu(self):
         pygame.display.set_caption("LOSE")
-        self.screen.fill((0, 0, 0))
+        self.screen.fill(Color("black"))
         lose_buttons = [Button(self.screen,
                                *(self.default_button_pos -
                                  self.default_button_size // 2),
@@ -335,8 +429,28 @@ class Asteroids:
                     self.game_state = GameState.QUIT
                     return
 
+    def __record_score(self):
+        if self.nickname not in self.leaderboard:
+            self.leaderboard[self.nickname] = self.spaceship.score
+        if self.spaceship.score > self.leaderboard[self.nickname]:
+            self.leaderboard[self.nickname] = self.spaceship.score
+        self.leaderboard = dict(sorted(self.leaderboard.items(),
+                                       key=lambda item: item[1], reverse=True))
+        with open("record_table.txt", "w") as record_table:
+            for player, score in self.leaderboard.items():
+                record_table.write(f"{player}: {score} \n")
+
+    def __fill_leaderboard(self):
+        with open("record_table.txt", "r") as record_table:
+            for string in record_table:
+                if not string.strip():
+                    return
+                player = string.split(":")[0]
+                score = int(string.split(":")[1][1:])
+                self.leaderboard[player] = score
+
     def __check_game_state(self):
-        if not self.spaceship:
+        if not self.spaceship.is_alive:
             self.game_state = GameState.LOSE_MENU
         elif not self.asteroids:
             self.game_state = GameState.WIN_MENU
