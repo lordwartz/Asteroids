@@ -126,7 +126,7 @@ class Asteroids:
                        Vector2(self.screen.get_size()[0] // 2, 20))
             print_text(self.screen, self.nickname, pygame.font.Font(None, 32),
                        Vector2(self.screen.get_size()[0] // 2, 50),
-                       Color("white"))
+                       (150, 150, 150))
 
         for game_object in self.__get_game_objects():
             game_object.draw(self.screen)
