@@ -28,13 +28,19 @@ class Asteroids:
 
     def __init__(self):
         init_pygame()
-        self.screen = pygame.display.set_mode((1500, 800))
+        self.screen = pygame.display.set_mode((1500, 700))
         self.default_text_pos = Vector2(self.screen.get_width() // 2,
                                         self.screen.get_height() // 12 * 6)
         self.default_button_pos = Vector2(self.screen.get_width() // 2,
                                           self.screen.get_height() // 12 * 7)
         self.default_button_size = Vector2(200, 50)
         self.default_button_delay = Vector2(0, self.screen.get_height() // 12)
+        self.default_input_field_size = Vector2(800, 60)
+        self.default_input_field_rect_pos = (self.default_text_pos
+                                             - self.default_button_delay // 2
+                                             - self.default_input_field_size
+                                             // 2,
+                                             self.default_input_field_size)
         self.clock = pygame.time.Clock()
         self.current_frame = 0
         self.font = pygame.font.Font(None, 64)
@@ -336,10 +342,10 @@ class Asteroids:
                             self.is_default_nickname = False
                         self.nickname += event.unicode
             print_text(self.screen, "Enter your name", self.font,
-                       (self.screen.get_size()[0] // 2, 250), Color("white"))
+                       self.default_text_pos - self.default_button_delay * 1.8, Color("white"))
             pygame.draw.rect(self.screen, (156, 156, 156),
-                             (350, 320, 800, 80))
-            print_text(self.screen, self.nickname, self.font, (750, 360),
+                             self.default_input_field_rect_pos)
+            print_text(self.screen, self.nickname, self.font, self.default_text_pos - self.default_button_delay // 2,
                        Color("white"))
 
     def __show_leaderboard(self):
