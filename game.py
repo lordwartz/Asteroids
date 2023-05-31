@@ -33,11 +33,11 @@ class Asteroids:
                                         self.screen.get_height() // 12 * 6)
         self.default_button_pos = Vector2(self.screen.get_width() // 2,
                                           self.screen.get_height() // 12 * 7)
-        self.default_button_size = Vector2(200, 50)
-        self.default_button_delay = Vector2(0, self.screen.get_height() // 12)
+        self.default_button_size = Vector2(300, 50)
+        self.default_delay = Vector2(0, self.screen.get_height() // 12)
         self.default_input_field_size = Vector2(800, 60)
         self.default_input_field_rect_pos = (self.default_text_pos
-                                             - self.default_button_delay // 2
+                                             - self.default_delay // 2
                                              - self.default_input_field_size
                                              // 2,
                                              self.default_input_field_size)
@@ -315,7 +315,7 @@ class Asteroids:
                    Button(self.screen,
                           *(self.default_button_pos
                             - self.default_button_size // 2
-                            + self.default_button_delay),
+                            + self.default_delay),
                           *self.default_button_size,
                           text='TO MENU', fontSize=40,
                           inactiveColour=(255, 0, 0),
@@ -342,24 +342,28 @@ class Asteroids:
                             self.is_default_nickname = False
                         self.nickname += event.unicode
             print_text(self.screen, "Enter your name", self.font,
-                       self.default_text_pos - self.default_button_delay * 1.8, Color("white"))
+                       self.default_text_pos - self.default_delay * 1.8,
+                       Color("white"))
             pygame.draw.rect(self.screen, (156, 156, 156),
                              self.default_input_field_rect_pos)
-            print_text(self.screen, self.nickname, self.font, self.default_text_pos - self.default_button_delay // 2,
+            print_text(self.screen, self.nickname, self.font,
+                       self.default_text_pos - self.default_delay // 2,
                        Color("white"))
 
     def __show_leaderboard(self):
         pygame.display.set_caption("Leaderboard")
         self.screen.fill(Color("black"))
         print_text(self.screen, "Leaderboard", pygame.font.Font(None, 90),
-                   (self.screen.get_size()[0] // 2, 100), Color("white"))
-
-        offset = 100
+                   (self.screen.get_size()[0] // 2, self.default_delay[1]),
+                   Color("RED"))
+        i = 1.5
         for player, score in self.leaderboard.items():
-            print_text(self.screen, f"{player}: {score}", self.font,
-                       Vector2(self.screen.get_size()[0] // 2, 100 + offset),
-                       Color("white"))
-            offset += 60
+            i += 1
+            if i < 10:
+                print_text(self.screen, f"{player}: {score}", self.font,
+                           Vector2(self.screen.get_size()[0] // 2,
+                                   self.default_delay[1] * i),
+                           Color("white"))
 
         pygame.display.flip()
 
@@ -388,7 +392,7 @@ class Asteroids:
                        Button(self.screen,
                               *(self.default_button_pos
                                 - self.default_button_size // 2
-                                + self.default_button_delay),
+                                + self.default_delay),
                               *self.default_button_size,
                               text='TO MENU', fontSize=40,
                               inactiveColour=(255, 0, 0),
@@ -419,7 +423,7 @@ class Asteroids:
                         Button(self.screen,
                                *(self.default_button_pos
                                  - self.default_button_size // 2
-                                 + self.default_button_delay),
+                                 + self.default_delay),
                                *self.default_button_size,
                                text='TO MENU', fontSize=40,
                                inactiveColour=(255, 0, 0),
