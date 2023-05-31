@@ -38,7 +38,8 @@ class Asteroids:
         self.clock = pygame.time.Clock()
         self.current_frame = 0
         self.font = pygame.font.Font(None, 64)
-        self.nickname = ""
+        self.nickname = "Default"
+        self.is_default_nickname = True
         self.leaderboard = {}
 
         self.game_state = GameState.MAIN_MENU
@@ -330,6 +331,9 @@ class Asteroids:
                         self.game_state = GameState.GAME
                         return
                     elif len(self.nickname) <= 20:
+                        if self.is_default_nickname:
+                            self.nickname = ""
+                            self.is_default_nickname = False
                         self.nickname += event.unicode
             print_text(self.screen, "Enter your name", self.font,
                        (self.screen.get_size()[0] // 2, 250), Color("white"))
