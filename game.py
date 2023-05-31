@@ -1,5 +1,7 @@
 import random
 import pygame
+from pygame_widgets import Mouse
+from pygame_widgets.button import Button
 from pygame import Color, Vector2
 from utils import get_random_position, print_text, load_sprite, get_random_size
 from models import Asteroid, Spaceship, Ufo
@@ -23,6 +25,12 @@ class Asteroids:
     def __init__(self):
         init_pygame()
         self.screen = pygame.display.set_mode((1500, 800))
+        self.default_text_pos = Vector2(self.screen.get_width() // 2,
+                                        self.screen.get_height() // 12 * 6)
+        self.default_button_pos = Vector2(self.screen.get_width() // 2,
+                                          self.screen.get_height() // 12 * 7)
+        self.default_button_size = Vector2(200, 50)
+        self.default_button_delay = Vector2(0, self.screen.get_height() // 12)
         self.clock = pygame.time.Clock()
         self.current_frame = 0
         self.font = pygame.font.Font(None, 64)
@@ -39,7 +47,6 @@ class Asteroids:
         )
         self.spaceship = Spaceship(self.standard_spaceship_position,
                                    self.bullets.append)
-
         self.__generate_asteroids()
 
     def start_game(self):
@@ -109,10 +116,6 @@ class Asteroids:
 
         for game_object in self.__get_game_objects():
             game_object.draw(self.screen)
-
-        if self.win_message:
-            print_text(self.screen, self.win_message, self.font,
-                       Vector2(self.screen.get_size()) / 2)
 
         pygame.display.flip()
         self.clock.tick(self.FRAMERATE)
@@ -212,117 +215,125 @@ class Asteroids:
         if self.spaceship.lives == 0:
             self.spaceship = None
 
-    def __pause_game(self):
-        pygame.display.set_caption("Paused")
-        print_text(self.screen, "PAUSED", self.font,
-                   Vector2(self.screen.get_size()) / 2)
-        pygame.display.flip()
-        while self.game_state is GameState.PAUSE:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.game_state = GameState.QUIT
-                    return
-                elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_ESCAPE:
-                            pygame.display.set_caption("Asteroids")
-                            self.game_state = GameState.GAME
-                            break
+    def __draw_label(self, text, color):
+        print_text(self.screen, text, self.font,
+                   self.default_text_pos, color=color)
+
+    @staticmethod
+    def __draw_buttons(lose_buttons):
+        Mouse.updateMouseState()
+        for button in lose_buttons:
+            button.listen(pygame.event.get())
+            button.draw()
 
     def __show_main_menu(self):
         pygame.display.set_caption("Menu")
-        print_text(self.screen, "THE ASTEROIDS", self.font,
-                   Vector2(self.screen.get_size()) / 2)
-        pygame.display.flip()
+        self.screen.fill((0, 0, 0))
+        menu_buttons = [Button(self.screen,
+                               *(self.default_button_pos
+                                 - self.default_button_size // 2),
+                               *self.default_button_size,
+                               text='PLAY', fontSize=40,
+                               inactiveColour=(255, 0, 0),
+                               pressedColour=(0, 255, 0), radius=20,
+                               onClick=lambda:
+                               self.__change_game_state(GameState.GAME))]
         while self.game_state is GameState.MAIN_MENU:
+            self.__draw_label("THE ASTEROIDS", "white")
+            self.__draw_buttons(menu_buttons)
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.game_state = GameState.QUIT
+
+    def __pause_game(self):
+        pygame.display.set_caption("Paused")
+        buttons = [Button(self.screen,
+                          *(self.default_button_pos -
+                            self.default_button_size // 2),
+                          *self.default_button_size,
+                          text='MAIN MENU', fontSize=40,
+                          inactiveColour=(155, 155, 155),
+                          pressedColour=(200, 200, 200), radius=20,
+                          onClick=lambda:
+                          self.__change_game_state(GameState.MAIN_MENU))]
+        while self.game_state is GameState.PAUSE:
+            self.__draw_label("PAUSED", "red")
+            self.__draw_buttons(buttons)
+            pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.game_state = GameState.QUIT
                     return
                 elif event.type == pygame.KEYDOWN:
-                    match event.key:
-                        case pygame.K_RETURN:
-                            self.game_state = GameState.GAME
-                            pygame.display.set_caption("Asteroids")
-                            break
-                        case pygame.K_ESCAPE:
-                            self.game_state = GameState.QUIT
-                            return
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.display.set_caption("Asteroids")
+                        self.game_state = GameState.GAME
+                        break
 
     def __show_win_menu(self):
-        surface = self.screen
-        surface.fill((0, 0, 0))
-
-        button_width = 200
-        button_height = 100
-        button_x = (surface.get_size()[0] - button_width) // 2
-        button_y = (surface.get_size()[1] - button_height) // 2
-
-        text_message_color = Color("green")
-        color_rectangle = (67, 67, 67)
+        pygame.display.set_caption("WIN")
+        self.screen.fill((0, 0, 0))
+        win_buttons = [Button(self.screen,
+                              *(self.default_button_pos -
+                                self.default_button_size // 2),
+                              *self.default_button_size,
+                              text='RESTART', fontSize=40,
+                              inactiveColour=(255, 0, 0),
+                              pressedColour=(0, 255, 0), radius=20,
+                              onClick=lambda: restart_game(self, False)),
+                       Button(self.screen,
+                              *(self.default_button_pos
+                                - self.default_button_size // 2
+                                + self.default_button_delay),
+                              *self.default_button_size,
+                              text='TO MENU', fontSize=40,
+                              inactiveColour=(255, 0, 0),
+                              pressedColour=(0, 255, 0),
+                              radius=20,
+                              onClick=lambda:
+                              restart_game(self, True))
+                       ]
         while self.game_state is GameState.WIN_MENU:
+            self.__draw_label("YOU WIN", "green")
+            self.__draw_buttons(win_buttons)
+            pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.game_state = GameState.QUIT
                     return
-                mouse_pos = pygame.mouse.get_pos()
-                if button_x <= mouse_pos[0] <= button_x + button_width \
-                        and button_y <= mouse_pos[1] \
-                        <= button_y + button_height:
-                    color_rectangle = (82, 82, 82)
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        restart_game(self)
-                        break
-                else:
-                    color_rectangle = (67, 67, 67)
-
-            surface.fill(Color("black"))
-            pygame.draw.rect(surface, color_rectangle,
-                             (button_x, button_y, button_width, button_height))
-            print_text(surface, "YOU WIN", pygame.font.Font(None, 100),
-                       Vector2(surface.get_size()[0] // 2, 150),
-                       text_message_color)
-            print_text(surface, "Restart", pygame.font.Font(None, 36),
-                       Vector2(button_x + button_width // 2,
-                               button_y + button_height // 2), Color("white"))
-            pygame.display.flip()
 
     def __show_lose_menu(self):
-        surface = self.screen
-        surface.fill((0, 0, 0))
-
-        button_width = 200
-        button_height = 100
-        button_x = (surface.get_size()[0] - button_width) // 2
-        button_y = (surface.get_size()[1] - button_height) // 2
-
-        text_message_color = Color("red")
-        color_rectangle = (67, 67, 67)
+        pygame.display.set_caption("LOSE")
+        self.screen.fill((0, 0, 0))
+        lose_buttons = [Button(self.screen,
+                               *(self.default_button_pos -
+                                 self.default_button_size // 2),
+                               *self.default_button_size,
+                               text='RESTART', fontSize=40,
+                               inactiveColour=(255, 0, 0),
+                               pressedColour=(0, 255, 0), radius=20,
+                               onClick=lambda: restart_game(self, False)),
+                        Button(self.screen,
+                               *(self.default_button_pos
+                                 - self.default_button_size // 2
+                                 + self.default_button_delay),
+                               *self.default_button_size,
+                               text='TO MENU', fontSize=40,
+                               inactiveColour=(255, 0, 0),
+                               pressedColour=(0, 255, 0),
+                               radius=20,
+                               onClick=lambda:
+                               restart_game(self, True))
+                        ]
         while self.game_state is GameState.LOSE_MENU:
+            self.__draw_label("YOU LOSE", "red")
+            self.__draw_buttons(lose_buttons)
+            pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.game_state = GameState.QUIT
                     return
-                mouse_pos = pygame.mouse.get_pos()
-                if button_x <= mouse_pos[0] <= button_x + button_width \
-                        and button_y <= mouse_pos[1] \
-                        <= button_y + button_height:
-                    color_rectangle = (82, 82, 82)
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        restart_game(self)
-                        break
-                else:
-                    color_rectangle = (67, 67, 67)
-
-            surface.fill(Color("black"))
-            pygame.draw.rect(surface, color_rectangle,
-                             (button_x, button_y, button_width, button_height))
-            print_text(surface, "YOU LOSE", pygame.font.Font(None, 100),
-                       Vector2(surface.get_size()[0] // 2, 150),
-                       text_message_color)
-            print_text(surface, "Restart", pygame.font.Font(None, 36),
-                       Vector2(button_x + button_width // 2,
-                               button_y + button_height // 2), Color("white"))
-            pygame.display.flip()
 
     def __check_game_state(self):
         if not self.spaceship:
@@ -330,12 +341,18 @@ class Asteroids:
         elif not self.asteroids:
             self.game_state = GameState.WIN_MENU
 
+    def __change_game_state(self, game_state):
+        if game_state is GameState.MAIN_MENU:
+            restart_game(self, True)
+        else:
+            self.game_state = game_state
+
 
 def init_pygame():
     pygame.init()
     pygame.display.set_caption("Asteroids")
 
 
-def restart_game(asteroids):
+def restart_game(asteroids, to_menu):
     asteroids.__init__()
-    asteroids.game_state = GameState.GAME
+    asteroids.game_state = GameState.MAIN_MENU if to_menu else GameState.GAME
