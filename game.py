@@ -47,6 +47,8 @@ class Asteroids:
         self.nickname = "Default"
         self.is_default_nickname = True
         self.leaderboard = {}
+        self.level = 4
+        self.ufo_quantity = 0
 
         self.game_state = GameState.MAIN_MENU
         self.asteroids = []
@@ -59,7 +61,7 @@ class Asteroids:
         )
         self.spaceship = Spaceship(self.standard_spaceship_position,
                                    self.bullets.append)
-        self.__generate_asteroids()
+        self.__generate_enemies()
         self.__fill_leaderboard()
 
     def start_game(self):
@@ -113,6 +115,8 @@ class Asteroids:
     def __process_game_logic(self):
         self.__move_objects()
         self.__process_bullets_logic()
+        if not self.ufo_quantity == 0:
+            self.__generate_ufo()
         self.__process_ufo_logic()
         self.__check_bullets_collision()
         self.__check_ufo_collision()
@@ -128,6 +132,9 @@ class Asteroids:
             for i in range(self.spaceship.lives):
                 self.screen.blit(heart_image, (10 + i * heart_rect.width, 10))
 
+            print_text(self.screen, f'Level {self.level}',
+                       pygame.font.Font(None, 28),
+                       Vector2(48, 50), (150, 150, 150))
             print_text(self.screen, f'Score: {self.spaceship.score}',
                        pygame.font.Font(None, 32),
                        Vector2(self.screen.get_size()[0] // 2, 20))
@@ -142,8 +149,20 @@ class Asteroids:
         self.clock.tick(self.FRAMERATE)
         self.current_frame += 1
 
-    def __generate_asteroids(self):
-        for _ in range(6):
+    def __generate_enemies(self):
+        match self.level:
+            case 1:
+                self.__generate_asteroids(1)
+                self.ufo_quantity = 1
+            case 2:
+                self.__generate_asteroids(4)
+                self.ufo_quantity = 2
+            case 3:
+                self.__generate_asteroids(6)
+                self.ufo_quantity = 3
+
+    def __generate_asteroids(self, asteroids_quantity):
+        for _ in range(asteroids_quantity):
             while True:
                 position = get_random_position(self.screen)
                 if position.distance_to(self.spaceship.position) \
@@ -208,7 +227,7 @@ class Asteroids:
                     asteroid.split(self.spaceship)
                     break
 
-    def __process_ufo_logic(self):
+    def __generate_ufo(self):
         directions = {0: (0, 1),
                       1: (1, 0),
                       2: (-1, 0),
@@ -224,7 +243,9 @@ class Asteroids:
             direction = directions[random.randrange(4)]
             position = ufo_spawn[direction]
             self.ufo.append(Ufo(position, direction, self.bullets_ufo.append))
+            self.ufo_quantity -= 1
 
+    def __process_ufo_logic(self):
         if self.ufo:
             for ufo in self.ufo[:]:
                 if ufo.current_frame % ufo.BULLET_FREQUENCY == 0:
@@ -459,8 +480,15 @@ class Asteroids:
     def __check_game_state(self):
         if not self.spaceship.is_alive:
             self.game_state = GameState.LOSE_MENU
-        elif not self.asteroids:
+        elif not self.asteroids and not self.ufo and self.level == 4:
             self.game_state = GameState.WIN_MENU
+        elif not self.asteroids and not self.ufo and self.level < 4:
+            self.spaceship.position = self.standard_spaceship_position
+            self.spaceship.direction = Vector2(0, -1)
+            self.bullets = []
+            self.bullets_ufo = []
+            self.level += 1
+            self.__generate_enemies()
 
     def __change_game_state(self, game_state):
         match game_state:
