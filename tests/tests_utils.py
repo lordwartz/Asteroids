@@ -1,12 +1,12 @@
-import unittest
+from unittest.mock import patch, Mock
 
-from pygame import Vector2, Surface
+from pygame import Surface, Vector2
+from utils import wrap_position, get_random_velocity, get_random_size, \
+    get_random_position, load_sprite
+from unittest import TestCase, main
 
-from utils import wrap_position, get_random_position, get_random_velocity, \
-    get_random_size, print_text, draw_label
 
-
-class TestUtils(unittest.TestCase):
+class TestUtils(TestCase):
     def test_wrap_position_within_surface(self):
         position = (50, 60)
         surface = Surface((100, 100))
@@ -75,4 +75,4 @@ class TestUtils(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    main()
