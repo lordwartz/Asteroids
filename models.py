@@ -138,3 +138,4 @@ class Ufo(GameObject):
                           + self.velocity
         bullet = Bullet(self.position, bullet_velocity, False)
         self.create_bullet_callback(bullet)
+
