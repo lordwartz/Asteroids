@@ -1,8 +1,6 @@
-from unittest.mock import patch, Mock
-
 from pygame import Surface, Vector2
 from utils import wrap_position, get_random_velocity, get_random_size, \
-    get_random_position, load_sprite
+    get_random_position
 from unittest import TestCase, main
 
 
