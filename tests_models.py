@@ -82,8 +82,7 @@ class TestSpaceship(TestCase):
     def test_not_accelerate_with_velocity(self):
         self.spaceship.velocity = Vector2(2, 2)
         self.spaceship.not_accelerate()
-        expected_velocity = Vector2(2, 2) - Vector2(2,
-                                                    2) * self.spaceship.SPACESHIP_ANTIGRAVITY
+        expected_velocity = Vector2(2, 2) - Vector2(2, 2) * self.spaceship.SPACESHIP_ANTIGRAVITY
         self.assertEqual(self.spaceship.velocity, expected_velocity)
 
     def test_not_accelerate_without_velocity(self):
