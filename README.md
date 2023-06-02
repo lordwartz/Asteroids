@@ -1,37 +1,26 @@
-# Asteroids game
+# Asteroids
+## Требования
+- Python 3
+- библиотека Pygame (можно установить командой pip install pygame)
+- библиотека Pygame_widgets (можно установить командой pip install pygame_widgets)
 
-This is a simple implementation of Asteroids game using Python.
+## Как играть
+1. Нажмите Play и введите свое имя.
+2. Двигайте космический корабль с помощью WASD.
+3. Стреляйте по астероидам, нажимая на пробел.
+4. Пройдите 3 уровня для победы.
 
-Requirements
+## Особенности игры
+- Графический интерфейс пользователя (реализован с помощью библиотеки Pygame).
+- Несколько уровней с увеличивающейся сложностью.
+- Отслеживание и отображение очков.
+- Астероиды имеют разные размеры и дробную жизнь.
+- Вражеские НЛО, стреляющие по игроку.
 
-    Python 3
-    pygame library (can be installed using pip install pygame command)
+## Как запустить игру
+1. Клонируйте репозиторий.
+2. Из корневой директории запустите команду python main.py.
+3. Наслаждайтесь игрой!
 
-How to Play
-
-    Move the spaceship using arrow keys (up, down, left, right).
-    Shoot the asteroids with space bar.
-    Destroy larger asteroids to get more points.
-    Avoid collision with asteroids and enemy UFOs.
-    The game ends when all the lives are lost or all the asteroids are destroyed.
-
-Features
-
-    GUI interface using Pygame library.
-    Game mechanics include spaceship movement, shooting, and asteroid destruction.
-    
-    Score tracking and display.
-    Fractional lives.
-    Different types of asteroids with varying sizes.
-    Enemy UFOs that shoot the player.
-    To do: Multiple levels with increasing difficulty and leaderboard.
-
-How to Run
-
-    Clone the repository.
-    From the root directory, run python main.py.
-    Enjoy the game!
-
-Authors
-
-This project was created by Vladimir Obraztsov(Владимир Образцов) and Ilya Ratushniy(Илья Ратушный).
+## Авторы
+Этот проект был создан Владимиром Образцовым и Ильей Ратушным.
