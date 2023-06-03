@@ -398,7 +398,7 @@ class TestAsteroids(TestCase):
         asteroids_game.nickname = "Player1"
         asteroids_game.leaderboard = {"Player1": 1500}
 
-        asteroids_game._record_score("record_table_tests.txt")
+        asteroids_game._record_score("record_table.txt")
 
         self.assertEqual(asteroids_game.leaderboard["Player1"], 2000)
 
