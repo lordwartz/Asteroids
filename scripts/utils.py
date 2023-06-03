@@ -1,5 +1,4 @@
 import random
-import os
 
 from pygame import Color, event
 from pygame.image import load

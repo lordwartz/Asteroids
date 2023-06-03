@@ -2,9 +2,9 @@ import random
 import pygame
 from pygame_widgets.button import Button
 from pygame import Color, Vector2
-from utils import get_random_position, print_text, load_sprite, \
+from scripts.utils import get_random_position, print_text, load_sprite, \
     get_random_size, draw_buttons
-from models import Asteroid, Spaceship, Ufo, Bullet
+from scripts.models import Asteroid, Spaceship, Ufo, Bullet
 from enum import Enum
 
 
