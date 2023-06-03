@@ -4,8 +4,8 @@ from unittest.mock import Mock
 import pygame
 from pygame import Surface, Vector2
 
-from models import GameObject, Spaceship, Asteroid, Bullet, Ufo
-from utils import wrap_position
+from scripts.models import GameObject, Spaceship, Asteroid, Bullet, Ufo
+from scripts.utils import wrap_position
 
 pygame.init()
 pygame.display.set_mode((100, 100))

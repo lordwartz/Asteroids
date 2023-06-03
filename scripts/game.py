@@ -60,7 +60,7 @@ class Asteroids:
         self.spaceship = Spaceship(self.standard_spaceship_position,
                                    self.bullets.append)
         self._generate_enemies()
-        self._fill_leaderboard()
+        self._fill_leaderboard("record_table.txt")
 
     def start_game(self):
         while self.game_state is not GameState.QUIT:
@@ -78,10 +78,10 @@ class Asteroids:
                 case GameState.PAUSE:
                     self._pause_game()
                 case GameState.WIN_MENU:
-                    self._record_score()
+                    self._record_score("record_table.txt")
                     self._show_win_menu()
                 case GameState.LOSE_MENU:
-                    self._record_score()
+                    self._record_score("record_table.txt")
                     self._show_lose_menu()
         else:
             quit()
@@ -475,19 +475,19 @@ class Asteroids:
                     self.game_state = GameState.QUIT
                     return
 
-    def _record_score(self):
+    def _record_score(self, filename):
         if self.nickname not in self.leaderboard:
             self.leaderboard[self.nickname] = self.spaceship.score
         if self.spaceship.score > self.leaderboard[self.nickname]:
             self.leaderboard[self.nickname] = self.spaceship.score
         self.leaderboard = dict(sorted(self.leaderboard.items(),
                                        key=lambda item: item[1], reverse=True))
-        with open("record_table.txt", "w") as record_table:
+        with open(filename, "w") as record_table:
             for player, score in self.leaderboard.items():
                 record_table.write(f"{player}: {score} \n")
 
-    def _fill_leaderboard(self):
-        with open("record_table.txt", "r") as record_table:
+    def _fill_leaderboard(self, filename):
+        with open(filename, "r") as record_table:
             for string in record_table:
                 if not string.strip():
                     return

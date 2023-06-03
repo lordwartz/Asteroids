@@ -1,2 +1,0 @@
-Default: 1800 
-Player1: 1000 

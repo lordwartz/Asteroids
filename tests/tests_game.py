@@ -2,12 +2,12 @@ from unittest.mock import patch
 
 import pygame
 
-from unittest import TestCase, main, mock
+from unittest import TestCase, main
 
 from pygame import Vector2
 
-from game import GameState, Asteroids, restart_game
-from models import Spaceship, Asteroid, Bullet, Ufo
+from scripts.game import GameState, Asteroids, restart_game
+from scripts.models import Spaceship, Asteroid, Bullet, Ufo
 
 pygame.init()
 pygame.display.set_mode((100, 100))
@@ -401,7 +401,7 @@ class TestAsteroids(TestCase):
         asteroids_game.nickname = "Player1"
         asteroids_game.leaderboard = {"Player1": 1500}
 
-        asteroids_game._record_score()
+        asteroids_game._record_score("record_table_tests.txt")
 
         self.assertEqual(asteroids_game.leaderboard["Player1"], 2000)
 
@@ -413,7 +413,7 @@ class TestAsteroids(TestCase):
         asteroids_game.nickname = "Player1"
         asteroids_game.leaderboard = {"Player1": 1000}
 
-        asteroids_game._record_score()
+        asteroids_game._record_score("record_table_tests.txt")
 
         self.assertEqual(asteroids_game.leaderboard["Player1"], 1000)
 
@@ -421,7 +421,7 @@ class TestAsteroids(TestCase):
         asteroids_game = Asteroids()
         asteroids_game.leaderboard = {}
 
-        asteroids_game._fill_leaderboard()
+        asteroids_game._fill_leaderboard("record_table_tests.txt")
 
         expected_leaderboard = {"Player1": 1000}
         self.assertEqual(asteroids_game.leaderboard, expected_leaderboard)

@@ -1,4 +1,5 @@
 import random
+import os
 
 from pygame import Color, event
 from pygame.image import load
@@ -7,7 +8,7 @@ from pygame_widgets import Mouse
 
 
 def load_sprite(name, with_alpha=True):
-    path = f"assets/sprites/{name}.png"
+    path = f"../assets/sprites/{name}.png"
     loaded_sprite = load(path)
 
     if with_alpha:
