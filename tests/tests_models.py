@@ -157,14 +157,14 @@ class TestUfo(TestCase):
     def test_constructor(self):
         self.assertEqual(self.ufo.position, Vector2(self.position))
         self.assertEqual(self.ufo.velocity, self.velocity)
-        self.assertEqual(self.ufo.current_frame, 0)
+        self.assertEqual(self.ufo.current_frame_alive, 0)
 
     def test_move(self):
         surface = Mock()
         self.ufo.move(surface)
         expected_position = self.position + self.velocity
         self.assertEqual(self.ufo.position, Vector2(expected_position))
-        self.assertEqual(self.ufo.current_frame, 1)
+        self.assertEqual(self.ufo.current_frame_alive, 1)
 
 
 if __name__ == '__main__':

@@ -123,7 +123,7 @@ class Ufo(GameObject):
 
     def __init__(self, position, velocity, create_bullet_callback):
         self.create_bullet_callback = create_bullet_callback
-        self.current_frame = 0
+        self.current_frame_alive = 0
         self.velocity = velocity
 
         sprite = rotozoom(load_sprite("ufo"), 0, 1)
@@ -131,7 +131,7 @@ class Ufo(GameObject):
 
     def move(self, surface):
         self.position = self.position + self.velocity
-        self.current_frame += 1
+        self.current_frame_alive += 1
 
     def shoot(self):
         bullet_velocity = get_random_velocity(1, 2) * self.BULLET_SPEED \

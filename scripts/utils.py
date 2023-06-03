@@ -50,8 +50,8 @@ def print_text(surface, text, font, rect_center, color=Color("red")):
 
 
 def draw_label(self, text, color):
-    print_text(self.screen, text, self.font,
-               self.default_text_pos, color=color)
+    print_text(self.__screen, text, self.__font,
+               self.__default_text_pos, color=color)
 
 
 @staticmethod
