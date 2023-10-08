@@ -38,7 +38,12 @@ class Spaceship(GameObject):
         self.create_bullet_callback = create_bullet_callback
         self.is_alive = True
         self.direction = Vector2(0, -1)
-        self.shoot_sound = load_sound("laser-pistol")
+        self.__was_moved = False
+        self.was_rotating = False
+        self.__shoot_sound = load_sound("laser-pistol")
+        self.__accelerating_sound = load_sound("rocket-boost-engine")
+        self.__rotating_sound = load_sound("rocket-boost-engine")
+        self.__rotating_sound.set_volume(0.5)
 
         super().__init__(position, load_sprite("spaceship"), Vector2(0))
 
@@ -49,6 +54,13 @@ class Spaceship(GameObject):
         sign = 1 if clockwise else -1
         angle = self.MANEUVERABILITY * sign
         self.direction.rotate_ip(angle)
+        if (not self.was_rotating):
+            self.__rotating_sound.play()
+        self.was_rotating = True
+
+    def stop_rotating(self):
+        self.was_rotating = False
+        self.__rotating_sound.stop()
 
     def draw(self, surface):
         angle = self.direction.angle_to(Vector2(0, -1))
@@ -58,17 +70,23 @@ class Spaceship(GameObject):
         surface.blit(rotated_surface, blit_position)
 
     def accelerate(self):
+        if (not self.__was_moved):
+            self.__accelerating_sound.play()
         self.velocity += self.direction * self.ACCELERATION
+        self.__was_moved = True
 
     def not_accelerate(self):
+        if self.__was_moved:
+            self.__accelerating_sound.stop()
         if self.velocity != Vector2(0, 0):
             self.velocity -= self.velocity * self.SPACESHIP_ANTIGRAVITY
+        self.__was_moved = False
 
     def shoot(self):
         bullet_velocity = self.direction * self.BULLET_SPEED + self.velocity
         bullet = Bullet(self.position, bullet_velocity, True)
         self.create_bullet_callback(bullet)
-        self.shoot_sound.play()
+        self.__shoot_sound.play()
 
 
 class Asteroid(GameObject):

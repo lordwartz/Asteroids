@@ -103,6 +103,8 @@ class Asteroids:
                 self.__spaceship.rotate(clockwise=True)
             elif is_key_pressed[pygame.K_LEFT]:
                 self.__spaceship.rotate(clockwise=False)
+            else:
+                self.__spaceship.stop_rotating()
             if is_key_pressed[pygame.K_UP]:
                 self.__spaceship.accelerate()
             else:
