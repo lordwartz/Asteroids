@@ -212,6 +212,7 @@ class Asteroids:
         for bullet in self.__bullets[:]:
             for ufo in self.__ufo[:]:
                 if bullet.collides_with(ufo):
+                    ufo.destroy()
                     self.__spaceship.score += 200
                     self.__ufo.remove(ufo)
                     self.__bullets.remove(bullet)

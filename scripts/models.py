@@ -130,8 +130,10 @@ class Ufo(GameObject):
         self.create_bullet_callback = create_bullet_callback
         self.current_frame_alive = 0
         self.velocity = velocity
-
         sprite = rotozoom(load_sprite("ufo"), 0, 1)
+        self.shoot_sound = load_sound("ufo_laser")
+        self.destroying_sound = load_sound("ufo_explosion")
+
         super().__init__(position, sprite, self.velocity)
 
     def move(self, surface):
@@ -143,4 +145,8 @@ class Ufo(GameObject):
                           + self.velocity
         bullet = Bullet(self.position, bullet_velocity, False)
         self.create_bullet_callback(bullet)
+        self.shoot_sound.play()
+
+    def destroy(self):
+        self.destroying_sound.play()
 
