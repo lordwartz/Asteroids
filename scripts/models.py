@@ -41,9 +41,11 @@ class Spaceship(GameObject):
         self.__was_moved = False
         self.was_rotating = False
         self.__shoot_sound = load_sound("laser-pistol")
+        self.__shoot_sound.set_volume(0.4)
         self.__accelerating_sound = load_sound("rocket-boost-engine")
+        self.__accelerating_sound.set_volume(0.6)
         self.__rotating_sound = load_sound("rocket-boost-engine")
-        self.__rotating_sound.set_volume(0.5)
+        self.__rotating_sound.set_volume(0.3)
 
         super().__init__(position, load_sprite("spaceship"), Vector2(0))
 
@@ -105,7 +107,8 @@ class Asteroid(GameObject):
         scale = size_to_scale[reduction_size]
         sprite = rotozoom(load_sprite("asteroid"), 0, self.initial_size *
                           scale)
-        self.destroy_sound = load_sound("stone_crush")
+        self.__destroy_sound = load_sound("stone_crush")
+        self.__destroy_sound.set_volume(0.7)
 
         super().__init__(
             position, sprite, get_random_velocity(0.25, 1)
@@ -119,7 +122,7 @@ class Asteroid(GameObject):
         }
 
         spaceship.score += size_to_score[self.reduction_size]
-        self.destroy_sound.play()
+        self.__destroy_sound.play()
         if self.reduction_size > 1:
             for _ in range(2):
                 asteroid = Asteroid(
@@ -150,6 +153,7 @@ class Ufo(GameObject):
         self.velocity = velocity
         sprite = rotozoom(load_sprite("ufo"), 0, 1)
         self.shoot_sound = load_sound("ufo_laser")
+        self.shoot_sound.set_volume(0.35)
         self.destroying_sound = load_sound("ufo_explosion")
 
         super().__init__(position, sprite, self.velocity)
