@@ -37,8 +37,9 @@ class Spaceship(GameObject):
         self.lives = 3
         self.create_bullet_callback = create_bullet_callback
         self.is_alive = True
-
         self.direction = Vector2(0, -1)
+        self.shoot_sound = load_sound("laser-pistol")
+
         super().__init__(position, load_sprite("spaceship"), Vector2(0))
 
     def add_score(self, score_value):
@@ -67,6 +68,7 @@ class Spaceship(GameObject):
         bullet_velocity = self.direction * self.BULLET_SPEED + self.velocity
         bullet = Bullet(self.position, bullet_velocity, True)
         self.create_bullet_callback(bullet)
+        self.shoot_sound.play()
 
 
 class Asteroid(GameObject):
