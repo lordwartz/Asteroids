@@ -1,6 +1,7 @@
 from pygame.math import Vector2
 from pygame.transform import rotozoom
-from scripts.utils import get_random_velocity, load_sprite, wrap_position
+from scripts.utils import (get_random_velocity, load_sprite, wrap_position,
+                           load_sound)
 
 
 class GameObject:

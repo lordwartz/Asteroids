@@ -4,6 +4,7 @@ from pygame import Color, event
 from pygame.image import load
 from pygame.math import Vector2
 from pygame_widgets import Mouse
+from pygame.mixer import Sound
 
 
 def load_sprite(name, with_alpha=True):
@@ -15,6 +16,10 @@ def load_sprite(name, with_alpha=True):
     else:
         return loaded_sprite.convert()
 
+
+def load_sound(name)
+    path = f"../assets/sounds/{name}.png"
+    return Sound(path)
 
 def wrap_position(position, surface):
     x, y = position
