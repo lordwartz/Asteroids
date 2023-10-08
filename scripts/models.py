@@ -87,6 +87,7 @@ class Asteroid(GameObject):
         scale = size_to_scale[reduction_size]
         sprite = rotozoom(load_sprite("asteroid"), 0, self.initial_size *
                           scale)
+        self.destroy_sound = load_sound("stone_crush")
 
         super().__init__(
             position, sprite, get_random_velocity(0.25, 1)
@@ -100,6 +101,7 @@ class Asteroid(GameObject):
         }
 
         spaceship.score += size_to_score[self.reduction_size]
+        self.destroy_sound.play()
         if self.reduction_size > 1:
             for _ in range(2):
                 asteroid = Asteroid(
