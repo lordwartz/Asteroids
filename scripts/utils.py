@@ -17,8 +17,8 @@ def load_sprite(name, with_alpha=True):
         return loaded_sprite.convert()
 
 
-def load_sound(name)
-    path = f"../assets/sounds/{name}.png"
+def load_sound(name):
+    path = f"../assets/sounds/{name}.wav"
     return Sound(path)
 
 def wrap_position(position, surface):
