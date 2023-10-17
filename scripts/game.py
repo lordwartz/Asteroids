@@ -3,7 +3,7 @@ import pygame
 from pygame_widgets.button import Button
 from pygame import Color, Vector2
 from scripts.utils import get_random_position, print_text, load_sprite, \
-    get_random_size, draw_buttons
+    get_random_size, draw_buttons, load_sound
 from scripts.models import Asteroid, Spaceship, Ufo, Bullet
 from enum import Enum
 
@@ -48,7 +48,14 @@ class Asteroids:
         self.__level = 1
         self.__ufo_quantity = 0
 
+        self.menu_music = load_sound("laser-pistol")
+        self.game_music = load_sound("laser-pistol")
+        self.win_music = load_sound("laser-pistol")
+        self.lose_music = load_sound("laser-pistol")
+        self.is_music_play = { GameState.MAIN_MENU: False,  }
+
         self.__game_state = GameState.MAIN_MENU
+        self.__previous_game_state = self.__game_state
         self.__asteroids = []
         self.__bullets = []
         self.__bullets_ufo = []
@@ -66,23 +73,30 @@ class Asteroids:
         while self.__game_state is not GameState.QUIT:
             match self.__game_state:
                 case GameState.MAIN_MENU:
+                    self.__play_music(self.menu_music)
                     self.__show_main_menu()
                 case GameState.ENTER_NAME:
+                    self.__play_music(self.menu_music)
                     self.__show_input_field()
                 case GameState.LEADERBOARD:
+                    self.__play_music(self.menu_music)
                     self.__show_leaderboard()
                 case GameState.GAME:
+                    self.__play_music(self.game_music)
                     self.__handle_input()
                     self.__process_game_logic()
                     self.__draw()
                 case GameState.PAUSE:
                     self.__pause_game()
                 case GameState.WIN_MENU:
+                    self.__play_music(self.win_music)
                     self.__record_score("record_table.txt")
                     self.__show_win_menu()
                 case GameState.LOSE_MENU:
+                    self.__play_music(self.lose_music)
                     self.__record_score("record_table.txt")
                     self.__show_lose_menu()
+
         else:
             quit()
 
@@ -129,7 +143,8 @@ class Asteroids:
             heart_image = load_sprite("heart")
             heart_rect = heart_image.get_rect()
             for i in range(self.__spaceship.lives):
-                self.__screen.blit(heart_image, (10 + i * heart_rect.width, 10))
+                self.__screen.blit(heart_image,
+                                   (10 + i * heart_rect.width, 10))
 
             print_text(self.__screen, f'Level {self.__level}',
                        pygame.font.Font(None, 28),
@@ -137,7 +152,8 @@ class Asteroids:
             print_text(self.__screen, f'Score: {self.__spaceship.score}',
                        pygame.font.Font(None, 32),
                        Vector2(self.__screen.get_size()[0] // 2, 20))
-            print_text(self.__screen, self._nickname, pygame.font.Font(None, 32),
+            print_text(self.__screen, self._nickname,
+                       pygame.font.Font(None, 32),
                        Vector2(self.__screen.get_size()[0] // 2, 50),
                        (150, 150, 150))
 
@@ -244,7 +260,8 @@ class Asteroids:
                                     * self.__FRAMERATE)) == self.__FRAMERATE * 3:
             direction = directions[random.randrange(4)]
             position = ufo_spawn[direction]
-            self.__ufo.append(Ufo(position, direction, self.__bullets_ufo.append))
+            self.__ufo.append(
+                Ufo(position, direction, self.__bullets_ufo.append))
             self.__ufo_quantity -= 1
 
     def __process_ufo_logic(self):
@@ -484,7 +501,8 @@ class Asteroids:
         if self.__spaceship.score > self.__leaderboard[self._nickname]:
             self.__leaderboard[self._nickname] = self.__spaceship.score
         self.__leaderboard = dict(sorted(self.__leaderboard.items(),
-                                         key=lambda item: item[1], reverse=True))
+                                         key=lambda item: item[1],
+                                         reverse=True))
         with open(filename, "w") as record_table:
             for player, score in self.__leaderboard.items():
                 record_table.write(f"{player}: {score} \n")
@@ -512,6 +530,7 @@ class Asteroids:
             self.__generate_enemies()
 
     def __change_game_state(self, game_state):
+        self.menu_music.stop()
         match game_state:
             case GameState.MAIN_MENU:
                 restart_game(self, True)
@@ -520,6 +539,11 @@ class Asteroids:
                     self.__game_state = GameState.GAME
             case _:
                 self.__game_state = game_state
+
+    def __play_music(self, music):
+        if self.__game_state == GameState.PAUSE:
+            music.set_volume(0.35)
+        music.play(100000)
 
 
 def init_pygame():
