@@ -48,14 +48,24 @@ class Asteroids:
         self.__level = 1
         self.__ufo_quantity = 0
 
-        self.menu_music = load_sound("laser-pistol")
-        self.game_music = load_sound("laser-pistol")
-        self.win_music = load_sound("laser-pistol")
-        self.lose_music = load_sound("laser-pistol")
-        self.is_music_play = { GameState.MAIN_MENU: False,  }
+        self.menu_music = load_sound("Menu_m")
+        self.game_music = load_sound("Game_m")
+        self.win_music = load_sound("Win_m")
+        self.lose_music = load_sound("Lose_m")
+        self.musics = [self.menu_music,
+                       self.game_music,
+                       self.lose_music,
+                       self.win_music]
+        self.game_state_to_music = {GameState.MAIN_MENU: self.menu_music,
+                                    GameState.GAME: self.game_music,
+                                    GameState.WIN_MENU: self.win_music,
+                                    GameState.LOSE_MENU: self.lose_music,
+                                    GameState.PAUSE: self.game_music,
+                                    GameState.ENTER_NAME: self.lose_music,
+                                    GameState.LEADERBOARD: self.lose_music}
 
         self.__game_state = GameState.MAIN_MENU
-        self.__previous_game_state = self.__game_state
+        self.__previous_game_state = GameState.PAUSE
         self.__asteroids = []
         self.__bullets = []
         self.__bullets_ufo = []
@@ -71,32 +81,35 @@ class Asteroids:
 
     def start_game(self):
         while self.__game_state is not GameState.QUIT:
+            if self.__previous_game_state != self.__game_state and (not (self.__previous_game_state is GameState.MAIN_MENU and self.__game_state in [GameState.ENTER_NAME, GameState.LEADERBOARD])) and (not (self.__previous_game_state in [GameState.ENTER_NAME, GameState.LEADERBOARD] and self.__game_state is GameState.MAIN_MENU)) and (not (self.__previous_game_state is GameState.PAUSE and self.__game_state is GameState.GAME or self.__previous_game_state is GameState.GAME and self.__game_state is GameState.PAUSE)):
+                self.stop_all_music()
+                self.__play_music()
+            if self.__previous_game_state is GameState.PAUSE and self.__game_state is GameState.GAME:
+                self.game_music.set_volume(1)
+            if self.__previous_game_state is GameState.GAME and self.__game_state is GameState.PAUSE:
+                self.game_music.set_volume(0.2)
+            if self.__previous_game_state != self.__game_state:
+                self.__previous_game_state = self.__game_state
+
             match self.__game_state:
                 case GameState.MAIN_MENU:
-                    self.__play_music(self.menu_music)
                     self.__show_main_menu()
                 case GameState.ENTER_NAME:
-                    self.__play_music(self.menu_music)
                     self.__show_input_field()
                 case GameState.LEADERBOARD:
-                    self.__play_music(self.menu_music)
                     self.__show_leaderboard()
                 case GameState.GAME:
-                    self.__play_music(self.game_music)
                     self.__handle_input()
                     self.__process_game_logic()
                     self.__draw()
                 case GameState.PAUSE:
                     self.__pause_game()
                 case GameState.WIN_MENU:
-                    self.__play_music(self.win_music)
                     self.__record_score("record_table.txt")
                     self.__show_win_menu()
                 case GameState.LOSE_MENU:
-                    self.__play_music(self.lose_music)
                     self.__record_score("record_table.txt")
                     self.__show_lose_menu()
-
         else:
             quit()
 
@@ -365,7 +378,7 @@ class Asteroids:
                           inactiveColour=(255, 0, 0),
                           radius=20,
                           onClick=lambda:
-                          restart_game(self, True))
+                          self.__change_game_state(GameState.MAIN_MENU))
                    ]
         while self.__game_state is GameState.ENTER_NAME:
             draw_buttons(buttons)
@@ -530,20 +543,30 @@ class Asteroids:
             self.__generate_enemies()
 
     def __change_game_state(self, game_state):
-        self.menu_music.stop()
         match game_state:
             case GameState.MAIN_MENU:
-                restart_game(self, True)
+                if self.__previous_game_state not in [GameState.ENTER_NAME, GameState.LEADERBOARD]:
+                    self.stop_all_music()
+                    restart_game(self, True)
+                else:
+                    self.__game_state = GameState.MAIN_MENU
             case GameState.GAME:
                 if len(self._nickname) > 0:
                     self.__game_state = GameState.GAME
             case _:
                 self.__game_state = game_state
 
-    def __play_music(self, music):
-        if self.__game_state == GameState.PAUSE:
-            music.set_volume(0.35)
-        music.play(100000)
+    def stop_all_music(self):
+        for music in self.musics:
+            music.stop()
+
+
+    def __play_music(self):
+        if self.__game_state not in [GameState.QUIT, GameState.ENTER_NAME, GameState.LEADERBOARD]:
+            self.game_state_to_music[self.__game_state].play()
+        if self.__game_state is GameState.PAUSE:
+            self.game_state_to_music[self.__game_state].set_volume(0.35)
+
 
 
 def init_pygame():
