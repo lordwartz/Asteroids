@@ -42,7 +42,7 @@ class Asteroids:
         self.__clock = pygame.time.Clock()
         self.__current_frame = 0
         self.__font = pygame.font.Font(None, 64)
-        self._nickname = "Default"
+        self.nickname = "Default"
         self.__is_default_nickname = True
         self.__leaderboard = {}
         self.__level = 1
@@ -56,13 +56,13 @@ class Asteroids:
                        self.game_music,
                        self.lose_music,
                        self.win_music]
-        self.game_state_to_music = {GameState.MAIN_MENU: self.menu_music,
-                                    GameState.GAME: self.game_music,
-                                    GameState.WIN_MENU: self.win_music,
-                                    GameState.LOSE_MENU: self.lose_music,
-                                    GameState.PAUSE: self.game_music,
-                                    GameState.ENTER_NAME: self.lose_music,
-                                    GameState.LEADERBOARD: self.lose_music}
+        self.game_state_music = {GameState.MAIN_MENU: self.menu_music,
+                                 GameState.GAME: self.game_music,
+                                 GameState.WIN_MENU: self.win_music,
+                                 GameState.LOSE_MENU: self.lose_music,
+                                 GameState.PAUSE: self.game_music,
+                                 GameState.ENTER_NAME: self.lose_music,
+                                 GameState.LEADERBOARD: self.lose_music}
 
         self.__game_state = GameState.MAIN_MENU
         self.__previous_game_state = GameState.PAUSE
@@ -81,12 +81,25 @@ class Asteroids:
 
     def start_game(self):
         while self.__game_state is not GameState.QUIT:
-            if self.__previous_game_state != self.__game_state and (not (self.__previous_game_state is GameState.MAIN_MENU and self.__game_state in [GameState.ENTER_NAME, GameState.LEADERBOARD])) and (not (self.__previous_game_state in [GameState.ENTER_NAME, GameState.LEADERBOARD] and self.__game_state is GameState.MAIN_MENU)) and (not (self.__previous_game_state is GameState.PAUSE and self.__game_state is GameState.GAME or self.__previous_game_state is GameState.GAME and self.__game_state is GameState.PAUSE)):
+            if (self.__previous_game_state != self.__game_state
+                    and (not (self.__previous_game_state is GameState.MAIN_MENU
+                              and self.__game_state in [GameState.ENTER_NAME,
+                                                        GameState.LEADERBOARD]))
+                    and (not (self.__previous_game_state in
+                              [GameState.ENTER_NAME, GameState.LEADERBOARD]
+                              and self.__game_state is GameState.MAIN_MENU))
+                    and (not (self.__previous_game_state is GameState.PAUSE
+                              and self.__game_state is GameState.GAME
+                              or self.__previous_game_state is GameState.GAME
+                              and self.__game_state is GameState.PAUSE))):
                 self.stop_all_music()
                 self.__play_music()
-            if self.__previous_game_state is GameState.PAUSE and self.__game_state is GameState.GAME:
+            if (self.__previous_game_state is GameState.PAUSE
+                    and self.__game_state is GameState.GAME):
                 self.game_music.set_volume(1)
-            if self.__previous_game_state is GameState.GAME and self.__game_state is GameState.PAUSE:
+            if (self.__previous_game_state is GameState.GAME
+                    and self.__game_state is GameState.PAUSE):
+                self.__spaceship.stop_music()
                 self.game_music.set_volume(0.2)
             if self.__previous_game_state != self.__game_state:
                 self.__previous_game_state = self.__game_state
@@ -165,7 +178,7 @@ class Asteroids:
             print_text(self.__screen, f'Score: {self.__spaceship.score}',
                        pygame.font.Font(None, 32),
                        Vector2(self.__screen.get_size()[0] // 2, 20))
-            print_text(self.__screen, self._nickname,
+            print_text(self.__screen, self.nickname,
                        pygame.font.Font(None, 32),
                        Vector2(self.__screen.get_size()[0] // 2, 50),
                        (150, 150, 150))
@@ -225,6 +238,7 @@ class Asteroids:
                 self.__bullets_ufo.remove(collision_object)
             self.__spaceship.lives -= 1
             self.__check_death()
+            self.__spaceship.impact_sound.play()
 
     def __process_bullets_logic(self):
         for bullet in self.__bullets[:]:
@@ -292,6 +306,11 @@ class Asteroids:
     def __check_death(self):
         if self.__spaceship.lives == 0:
             self.__spaceship.is_alive = False
+            self.__spaceship.stop_music()
+            for ufo in self.__ufo:
+                ufo.stop_music()
+            for asteroid in self.__asteroids:
+                asteroid.stop_music()
 
     def __draw_label(self, text, color):
         print_text(self.__screen, text, self.__font,
@@ -389,21 +408,21 @@ class Asteroids:
                     return
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_BACKSPACE:
-                        self._nickname = self._nickname[:-1]
+                        self.nickname = self.nickname[:-1]
                     elif event.key == pygame.K_RETURN:
                         self.__game_state = GameState.GAME
                         return
-                    elif len(self._nickname) <= 20:
+                    elif len(self.nickname) <= 20:
                         if self.__is_default_nickname:
-                            self._nickname = ""
+                            self.nickname = ""
                             self.__is_default_nickname = False
-                        self._nickname += event.unicode
+                        self.nickname += event.unicode
             print_text(self.__screen, "Enter your name", self.__font,
                        self.__default_text_pos - self.__default_delay * 1.8,
                        Color("white"))
             pygame.draw.rect(self.__screen, (156, 156, 156),
                              self.__default_input_field_rect_pos)
-            print_text(self.__screen, self._nickname, self.__font,
+            print_text(self.__screen, self.nickname, self.__font,
                        self.__default_text_pos - self.__default_delay // 2,
                        Color("white"))
 
@@ -509,10 +528,10 @@ class Asteroids:
                     return
 
     def __record_score(self, filename):
-        if self._nickname not in self.__leaderboard:
-            self.__leaderboard[self._nickname] = self.__spaceship.score
-        if self.__spaceship.score > self.__leaderboard[self._nickname]:
-            self.__leaderboard[self._nickname] = self.__spaceship.score
+        if self.nickname not in self.__leaderboard:
+            self.__leaderboard[self.nickname] = self.__spaceship.score
+        if self.__spaceship.score > self.__leaderboard[self.nickname]:
+            self.__leaderboard[self.nickname] = self.__spaceship.score
         self.__leaderboard = dict(sorted(self.__leaderboard.items(),
                                          key=lambda item: item[1],
                                          reverse=True))
@@ -545,13 +564,14 @@ class Asteroids:
     def __change_game_state(self, game_state):
         match game_state:
             case GameState.MAIN_MENU:
-                if self.__previous_game_state not in [GameState.ENTER_NAME, GameState.LEADERBOARD]:
+                if self.__previous_game_state not in [GameState.ENTER_NAME,
+                                                      GameState.LEADERBOARD]:
                     self.stop_all_music()
                     restart_game(self, True)
                 else:
                     self.__game_state = GameState.MAIN_MENU
             case GameState.GAME:
-                if len(self._nickname) > 0:
+                if len(self.nickname) > 0:
                     self.__game_state = GameState.GAME
             case _:
                 self.__game_state = game_state
@@ -560,13 +580,12 @@ class Asteroids:
         for music in self.musics:
             music.stop()
 
-
     def __play_music(self):
-        if self.__game_state not in [GameState.QUIT, GameState.ENTER_NAME, GameState.LEADERBOARD]:
-            self.game_state_to_music[self.__game_state].play()
+        if self.__game_state not in [GameState.QUIT, GameState.ENTER_NAME,
+                                     GameState.LEADERBOARD]:
+            self.game_state_music[self.__game_state].play()
         if self.__game_state is GameState.PAUSE:
-            self.game_state_to_music[self.__game_state].set_volume(0.35)
-
+            self.game_state_music[self.__game_state].set_volume(0.35)
 
 
 def init_pygame():
@@ -575,10 +594,10 @@ def init_pygame():
 
 
 def restart_game(asteroids, to_menu):
-    nickname = asteroids._nickname
+    nickname = asteroids.nickname
     asteroids.__init__()
     if not to_menu:
-        asteroids._nickname = nickname
+        asteroids.nickname = nickname
         asteroids.__game_state = GameState.GAME
     else:
         asteroids.__game_state = GameState.MAIN_MENU

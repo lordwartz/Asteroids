@@ -23,7 +23,8 @@ class GameObject:
             distance = self.position.distance_to(other_obj.position)
             return distance < self.radius + other_obj.radius
         else:
-            raise Exception("Unable to check collision for non-existing object")
+            raise Exception(
+                "Unable to check collision for non-existing object")
 
 
 class Spaceship(GameObject):
@@ -46,6 +47,7 @@ class Spaceship(GameObject):
         self.__accelerating_sound.set_volume(0.6)
         self.__rotating_sound = load_sound("rocket-boost-engine")
         self.__rotating_sound.set_volume(0.3)
+        self.impact_sound = load_sound("spaceship_impact")
 
         super().__init__(position, load_sprite("spaceship"), Vector2(0))
 
@@ -90,6 +92,11 @@ class Spaceship(GameObject):
         self.create_bullet_callback(bullet)
         self.__shoot_sound.play()
 
+    def stop_music(self):
+        self.__shoot_sound.stop()
+        self.__rotating_sound.stop()
+        self.__accelerating_sound.stop()
+
 
 class Asteroid(GameObject):
     def __init__(self, position, create_asteroid_callback,
@@ -131,6 +138,9 @@ class Asteroid(GameObject):
                 )
                 self.create_asteroid_callback(asteroid)
 
+    def stop_music(self):
+        self.__destroy_sound.stop()
+
 
 class Bullet(GameObject):
     def __init__(self, position, velocity, is_spaceship_bullet):
@@ -152,9 +162,9 @@ class Ufo(GameObject):
         self.current_frame_alive = 0
         self.velocity = velocity
         sprite = rotozoom(load_sprite("ufo"), 0, 1)
-        self.shoot_sound = load_sound("ufo_laser")
-        self.shoot_sound.set_volume(0.35)
-        self.destroying_sound = load_sound("ufo_explosion")
+        self.__shoot_sound = load_sound("ufo_laser")
+        self.__shoot_sound.set_volume(0.35)
+        self.__destroying_sound = load_sound("ufo_explosion")
 
         super().__init__(position, sprite, self.velocity)
 
@@ -167,8 +177,11 @@ class Ufo(GameObject):
                           + self.velocity
         bullet = Bullet(self.position, bullet_velocity, False)
         self.create_bullet_callback(bullet)
-        self.shoot_sound.play()
+        self.__shoot_sound.play()
 
     def destroy(self):
-        self.destroying_sound.play()
+        self.__destroying_sound.play()
 
+    def stop_music(self):
+        self.__destroying_sound.stop()
+        self.__shoot_sound.stop()
