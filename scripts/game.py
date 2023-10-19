@@ -483,7 +483,8 @@ class Asteroids:
                               text='RESTART', fontSize=40,
                               inactiveColour=(255, 0, 0),
                               radius=20,
-                              onClick=lambda: restart_game(self, False)),
+                              onClick=lambda:
+                              self.__change_game_state(GameState.MAIN_MENU)),
                        Button(self.__screen,
                               *(self.__default_button_pos
                                 - self.__default_button_size // 2
@@ -493,7 +494,7 @@ class Asteroids:
                               inactiveColour=(255, 0, 0),
                               radius=20,
                               onClick=lambda:
-                              restart_game(self, True))
+                              self.__change_game_state(GameState.MAIN_MENU))
                        ]
         while self.__game_state is GameState.WIN_MENU:
             self.__draw_label("YOU WIN", "green")
@@ -514,7 +515,8 @@ class Asteroids:
                                text='RESTART', fontSize=40,
                                inactiveColour=(255, 0, 0),
                                radius=20,
-                               onClick=lambda: restart_game(self, False)),
+                               onClick=lambda:
+                               self.__change_game_state(GameState.MAIN_MENU)),
                         Button(self.__screen,
                                *(self.__default_button_pos
                                  - self.__default_button_size // 2
@@ -524,7 +526,7 @@ class Asteroids:
                                inactiveColour=(255, 0, 0),
                                radius=20,
                                onClick=lambda:
-                               restart_game(self, True))
+                               self.__change_game_state(GameState.MAIN_MENU))
                         ]
         while self.__game_state is GameState.LOSE_MENU:
             self.__draw_label("YOU LOSE", "red")
